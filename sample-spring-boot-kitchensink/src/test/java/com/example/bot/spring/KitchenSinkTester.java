@@ -72,6 +72,23 @@ public class KitchenSinkTester {
 			thrown = true;
 		}
 		assertThat(!thrown);
-		assertThat(result.equals("def"));
+		if (result != null) {
+			assertThat(result.equals("def"));
+		}
+	}
+	
+	@Test
+	public void testFound2() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("Hi");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		if (result != null) {
+			assertThat(result.equals("Hey, how things going?"));
+		}
 	}
 }
