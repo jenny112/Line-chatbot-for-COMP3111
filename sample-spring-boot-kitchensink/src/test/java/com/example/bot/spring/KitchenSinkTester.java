@@ -91,4 +91,19 @@ public class KitchenSinkTester {
 			assertThat(result.equals("Hey, how things going?"));
 		}
 	}
+	
+	@Test
+	public void testFound3() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("I am fine");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		if (result != null) {
+			assertThat(result.equals("Great!"));
+		}
+	}
 }
