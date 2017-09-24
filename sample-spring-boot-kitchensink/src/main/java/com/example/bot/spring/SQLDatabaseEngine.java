@@ -5,14 +5,34 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.net.URISyntaxException;
+import java.io.IOException;
 import java.net.URI;
 
 @Slf4j
 public class SQLDatabaseEngine extends DatabaseEngine {
 	@Override
 	String search(String text) throws Exception {
-		//Write your code here
-		return null;
+		String result = null;
+		try {
+			Connection connection = getConnection();
+			PreparedStatement stmt = connection.prepareStatement(
+					"SELECT response FROM data WHERE keyword like concat('%', ?, '%')");
+			stmt.setString(1, text.toLowerCase());
+			ResultSet rs = stmt.executeQuery();
+			if (rs != null)
+				result = rs.getString(1);
+			if (rs != null)
+				rs.close();
+			if (stmt != null)
+				stmt.close();
+			if (connection != null)
+				connection.close();
+		} catch (SQLException ex) {
+			log.info("SQLException while closing database: {}", ex.toString());
+		}
+		if (result != null)
+			return result;
+		throw new Exception("NOT FOUND");
 	}
 	
 	

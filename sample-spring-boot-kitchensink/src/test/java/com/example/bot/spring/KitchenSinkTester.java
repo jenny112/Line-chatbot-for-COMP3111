@@ -46,10 +46,10 @@ import com.example.bot.spring.DatabaseEngine;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { KitchenSinkTester.class, DatabaseEngine.class })
+@SpringBootTest(classes = { KitchenSinkTester.class, SQLDatabaseEngine.class })
 public class KitchenSinkTester {
 	@Autowired
-	private DatabaseEngine databaseEngine;
+	private SQLDatabaseEngine databaseEngine;
 	
 	@Test
 	public void testNotFound() throws Exception {
@@ -104,6 +104,36 @@ public class KitchenSinkTester {
 		assertThat(!thrown);
 		if (result != null) {
 			assertThat(result.equals("Great!"));
+		}
+	}
+	
+	@Test
+	public void testFound4() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("Who is Prof Kim");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		if (result != null) {
+			assertThat(result.equals("Well, this is your instructor."));
+		}
+	}
+	
+	@Test
+	public void testFound5() throws Exception {
+		boolean thrown = false;
+		String result = null;
+		try {
+			result = this.databaseEngine.search("How is the grade of this course?");
+		} catch (Exception e) {
+			thrown = true;
+		}
+		assertThat(!thrown);
+		if (result != null) {
+			assertThat(result.equals("This is absolute good grade for good student. And I am sure you are!"));
 		}
 	}
 }
