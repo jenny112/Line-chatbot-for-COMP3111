@@ -20,7 +20,7 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 			stmt.setString(1, text.toLowerCase());
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()) {
-				if (rs != null)
+				if (rs != null && result == null)
 					result = rs.getString(1);
 			}
 			if (rs != null)
