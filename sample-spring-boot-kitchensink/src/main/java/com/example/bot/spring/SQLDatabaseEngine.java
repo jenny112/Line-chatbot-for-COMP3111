@@ -16,11 +16,13 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 		try {
 			Connection connection = getConnection();
 			PreparedStatement stmt = connection.prepareStatement(
-					"SELECT response FROM data WHERE keyword like concat('%', ?, '%')");
+					"SELECT response FROM data WHERE lower(keyword) like concat('%', ?, '%')");
 			stmt.setString(1, text.toLowerCase());
 			ResultSet rs = stmt.executeQuery();
-			if (rs != null)
-				result = rs.getString(1);
+			while(rs.next()) {
+				if (rs != null && result == null)
+					result = rs.getString(1);
+			}
 			if (rs != null)
 				rs.close();
 			if (stmt != null)
