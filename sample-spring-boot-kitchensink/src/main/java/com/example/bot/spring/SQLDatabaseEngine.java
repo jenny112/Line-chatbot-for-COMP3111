@@ -21,7 +21,7 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()) {
 				if (rs != null)
-					result = rs.getString(1);
+					result = rs.getString(0);
 			}
 			if (rs != null)
 				rs.close();
