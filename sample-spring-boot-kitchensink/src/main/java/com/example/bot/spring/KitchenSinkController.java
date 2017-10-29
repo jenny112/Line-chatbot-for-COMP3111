@@ -216,7 +216,7 @@ public class KitchenSinkController {
             throws Exception {
         String text = content.getText();
         try {
-        	InputStream inputStream = new FileInputStream("en-sent.bin");
+        	InputStream inputStream = new FileInputStream("/static/en-sent.bin");
         	if (inputStream == null)
         		throw new Exception("File wrong");
 	        SentenceModel model = new SentenceModel(inputStream);
