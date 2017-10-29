@@ -296,7 +296,7 @@ public class KitchenSinkController {
                     if (reply == null)
                     	reply = notfound;
             	} catch (Exception e) {
-        			this.reply(replyToken, "tokens/tags is null");
+        			this.replyText(replyToken, "tokens/tags is null");
             		System.err.println(e.getMessage());
             	}
                 log.info("Returns echo message {}: {}", replyToken, reply);
