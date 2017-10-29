@@ -87,14 +87,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 
-import opennlp.tools.sentdetect.SentenceDetectorME;
-import opennlp.tools.sentdetect.SentenceModel;
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSSample;
+import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.tokenize.Tokenizer;
+import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
 
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
 	
-
+	private static final String notfound = "Sorry, we don't have answer for this";
 
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
@@ -215,16 +219,24 @@ public class KitchenSinkController {
 
 	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
             throws Exception {
+		// Get User Input
         String text = content.getText();
-    	InputStream inputStream = this.getClass().getResourceAsStream("/static/en-sent.bin");
-    	
-    	if (inputStream == null)
-    		throw new Exception("File wrong");
-        SentenceModel model = new SentenceModel(inputStream);
-        SentenceDetectorME detector = new SentenceDetectorME(model);  
         
-        //Detecting the sentence
-        String sentences[] = detector.sentDetect(text); 
+        //Load Tokenizer model
+        InputStream tokenis = this.getClass().getResourceAsStream("/static/en-token.bin");
+        TokenizerModel modelToken = new TokenizerModel(tokenis);
+        
+        //Load POS tagging model
+        InputStream taggeris = this.getClass().getResourceAsStream("/static/en-pos-maxent.bin");
+        POSModel modelPOS = new POSModel(taggeris);
+        POSTaggerME tagger = new POSTaggerME(modelPOS);
+        
+        //Tokenize the sentence
+        Tokenizer tokenizer = new TokenizerME(modelToken);
+        String[] tokens = tokenizer.tokenize(text);
+        
+        //Generate tags[]
+        String tags[] = tagger.tag(tokens);
         
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
@@ -275,18 +287,49 @@ public class KitchenSinkController {
             default:
             	String reply = null;
             	try {
-            		reply = database.search(text);
+            		//reply = database.search(text);
+            		
+            		//Search keywords for greeting
+                    reply = searchForGreeting(tokens, tags);
+                    
+                    //If client is not greeting, reply don't have answer
+                    if (reply == null)
+                    	reply = notfound;
             	} catch (Exception e) {
-            		reply = sentences[0];
+            		System.err.println(e.getMessage());
             	}
                 log.info("Returns echo message {}: {}", replyToken, reply);
-                this.replyText(
-                        replyToken,
-                        itscLOGIN + " says " + reply
-                );
+                this.replyText(replyToken, reply);
                 break;
         }
+        tokenis.close();
+        taggeris.close();
     }
+	
+	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
+		//Check if tokens and tags are not null
+		if (tokens == null || tags == null)
+			throw new Exception("Passing null arguments to searchForGreeting()");
+		
+		//Define greeting words
+		String greetingString = "Hi Hello Yo";
+		
+		//Search for greeting words from client
+		boolean greeting = false;
+		for (int i = 0; i < tags.length; i++) {
+			if (tags[i] == "NNP") {
+				if (greetingString.contains(tokens[i])) {
+					greeting = true;
+					break;
+				}
+			}
+		}
+		
+		//Return Greeting message if client greets first
+		if (greeting)
+			return "Hi. How can I help you?";
+		return null;
+	}
 
 	static String createUri(String path) {
 		return ServletUriComponentsBuilder.fromCurrentContextPath().path(path).build().toUriString();
