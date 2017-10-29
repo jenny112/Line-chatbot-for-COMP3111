@@ -216,19 +216,15 @@ public class KitchenSinkController {
 	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
             throws Exception {
         String text = content.getText();
-        try {
-        	InputStream inputStream = KitchenSinkController.class.getResourceAsStream("/static/en-sent.bin");
-        	
-        	if (inputStream == null)
-        		throw new Exception("File wrong");
-	        SentenceModel model = new SentenceModel(inputStream);
-	        SentenceDetectorME detector = new SentenceDetectorME(model);  
-	        
-	        //Detecting the sentence
-	        String sentences[] = detector.sentDetect(text); 
-        } catch (Exception e) {
-        	this.replyText(replyToken, e.getMessage());
-        }
+    	InputStream inputStream = this.getClass().getResourceAsStream("/static/en-sent.bin");
+    	
+    	if (inputStream == null)
+    		throw new Exception("File wrong");
+        SentenceModel model = new SentenceModel(inputStream);
+        SentenceDetectorME detector = new SentenceDetectorME(model);  
+        
+        //Detecting the sentence
+        String sentences[] = detector.sentDetect(text); 
         
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
@@ -281,7 +277,7 @@ public class KitchenSinkController {
             	try {
             		reply = database.search(text);
             	} catch (Exception e) {
-            		reply = text;
+            		reply = sentences[0];
             	}
                 log.info("Returns echo message {}: {}", replyToken, reply);
                 this.replyText(
