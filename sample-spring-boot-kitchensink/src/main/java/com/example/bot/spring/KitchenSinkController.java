@@ -238,9 +238,6 @@ public class KitchenSinkController {
         //Generate tags[]
         String tags[] = tagger.tag(tokens);
         
-        //Instatiate POSSample
-        POSSample sample = new POSSample(tokens, tags);
-        
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
             case "profile": {
@@ -293,7 +290,7 @@ public class KitchenSinkController {
             		//reply = database.search(text);
             		
             		//Search keywords for greeting
-                    reply = searchForGreeting(sample);
+                    reply = searchForGreeting(tokens, tags);
                     
                     //If client is not greeting, reply don't have answer
                     if (reply == null)
@@ -310,9 +307,9 @@ public class KitchenSinkController {
         taggeris.close();
     }
 	
-	private String searchForGreeting(POSSample sample) throws Exception {
+	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
-		if (sample == null) {
+		if (tokens == null || tags == null) {
 			throw new Exception("Passing null arguments to searchForGreeting()");
 		}
 		//Define greeting words
@@ -320,21 +317,22 @@ public class KitchenSinkController {
 		
 		//Search for greeting words from client
 		boolean greeting = false;
-		String[] wordsWithTags = sample.toString().split(" ");
-		for (int i = 0; i < wordsWithTags.length; i++) {
-			if (wordsWithTags[i].contains("NNP")) {
-				String[] tokens = wordsWithTags[i].split("_");
-				if (greetingString.contains(tokens[0].toLowerCase())) {
+		for (int i = 0; i < tags.length; i++) {
+			if (tags[i] == "UH") {
+				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
 				}
 			}
 		}
-		String message = sample.toString();
+		
 		//Return Greeting message if client greets first
 		if (greeting)
 			return "Hi. How can I help you?";
-		
+		String message = null;
+		for (String s: tags) {
+			message = message + s + " ";
+		}
 		return message;
 	}
 
