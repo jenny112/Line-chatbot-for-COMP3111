@@ -342,7 +342,7 @@ public class KitchenSinkController {
 	
 	//For debugging only
 	private String printStringArray(String[] stringArray) {
-		String message = null;
+		String message = "";
 		for (String s: stringArray) {
 			message = message + s + " ";
 		}
