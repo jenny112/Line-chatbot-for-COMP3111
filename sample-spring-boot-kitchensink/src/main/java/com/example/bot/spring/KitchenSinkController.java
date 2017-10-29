@@ -318,7 +318,7 @@ public class KitchenSinkController {
 		//Search for greeting words from client
 		boolean greeting = false;
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i] == "nullUH" || tags[i] == "UH") {
+			if (tags[i].contains("PRP$") || tags[i] == "UH") {
 				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
