@@ -17,6 +17,8 @@
 package com.example.bot.spring;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -83,6 +85,9 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+
+import opennlp.tools.sentdetect.SentenceDetectorME;
+import opennlp.tools.sentdetect.SentenceModel;
 
 @Slf4j
 @LineMessageHandler
@@ -210,7 +215,13 @@ public class KitchenSinkController {
 	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
             throws Exception {
         String text = content.getText();
-
+        InputStream inputStream = new FileInputStream("ensent.bin");
+        SentenceModel model = new SentenceModel(inputStream);
+        SentenceDetectorME detector = new SentenceDetectorME(model);  
+        
+        //Detecting the sentence
+        String sentences[] = detector.sentDetect(text); 
+        
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
             case "profile": {
@@ -242,14 +253,14 @@ public class KitchenSinkController {
                                         new URIAction("Go to line.me",
                                                       "https://line.me"),
                                         new PostbackAction("Say hello1",
-                                                           "hello 瓊嚙賤�����嚙蝓姻�嚙蝓￣�嚙蝓�")
+                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭")
                                 )),
                                 new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                        new PostbackAction("癡穡� hello2",
-                                                           "hello 瓊嚙賤�����嚙蝓姻�嚙蝓￣�嚙蝓�",
-                                                           "hello 瓊嚙賤�����嚙蝓姻�嚙蝓￣�嚙蝓�"),
+                                        new PostbackAction("�蝛∴蕭蹌� hello2",
+                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭",
+                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭"),
                                         new MessageAction("Say message",
-                                                          "Rice=癟簣糧")
+                                                          "Rice=��除蝟�")
                                 ))
                         ));
                 TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
@@ -269,6 +280,9 @@ public class KitchenSinkController {
                         replyToken,
                         itscLOGIN + " says " + reply
                 );
+                for (String sent: sentences) {
+                	this.replyText(replyToken, sent);
+                }
                 break;
         }
     }
