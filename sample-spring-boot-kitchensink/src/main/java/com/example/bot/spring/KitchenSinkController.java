@@ -16,6 +16,7 @@
 
 package com.example.bot.spring;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -216,7 +217,8 @@ public class KitchenSinkController {
             throws Exception {
         String text = content.getText();
         try {
-        	InputStream inputStream = new FileInputStream("src/main/resources/static/en-sent.bin");
+        	String path = new File("src/main/resources/static/en-sent.bin").getAbsolutePath();
+        	InputStream inputStream = new FileInputStream(path);
         	if (inputStream == null)
         		throw new Exception("File wrong");
 	        SentenceModel model = new SentenceModel(inputStream);
