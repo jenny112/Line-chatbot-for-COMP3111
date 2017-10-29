@@ -313,7 +313,7 @@ public class KitchenSinkController {
 			throw new Exception("Passing null arguments to searchForGreeting()");
 		}
 		//Define greeting words
-		String greetingString = "hi hello yo";
+		String greetingString = "hi hello yo welcome";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
