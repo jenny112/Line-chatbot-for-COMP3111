@@ -296,6 +296,7 @@ public class KitchenSinkController {
                     if (reply == null)
                     	reply = notfound;
             	} catch (Exception e) {
+        			this.reply(replyToken, "tokens/tags is null");
             		System.err.println(e.getMessage());
             	}
                 log.info("Returns echo message {}: {}", replyToken, reply);
@@ -309,7 +310,6 @@ public class KitchenSinkController {
 	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
 		if (tokens == null || tags == null) {
-			this.reply(replyToken, "tokens/tags is null");
 			throw new Exception("Passing null arguments to searchForGreeting()");
 		}
 		//Define greeting words
