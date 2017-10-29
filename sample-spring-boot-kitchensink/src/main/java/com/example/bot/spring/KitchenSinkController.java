@@ -314,22 +314,40 @@ public class KitchenSinkController {
 		}
 		//Define greeting words
 		String greetingString = "hi hello yo";
+		String questionWords = "what when ";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i].contains("PRP$") || tags[i].equals("UH") || tags[i].equals("nullUH")) {
+			//for greeting
+			if (tags[i].equals("PRP$") || tags[i].equals("nullPRP$") || tags[i].equals("UH") || tags[i].equals("nullUH")) {
 				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
 				}
 			}
+			//for display tour
+			
 		}
+		
+		greeting = false;
 		
 		//Return Greeting message if client greets first
 		if (greeting)
 			return "Hi! How can I help you?";
-		return null;
+		String message = printStringArray(tags);
+		message += printStringArray(tokens);
+		return message;
+	}
+	
+	//For debugging only
+	private String printStringArray(String[] stringArray) {
+		String message = null;
+		for (String s: stringArray) {
+			message = message + s + " ";
+		}
+		message += "\n";
+		return message;
 	}
 
 	static String createUri(String path) {
