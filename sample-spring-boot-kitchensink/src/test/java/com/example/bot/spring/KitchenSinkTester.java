@@ -51,6 +51,7 @@ public class KitchenSinkTester {
 	@Autowired
 	private SQLDatabaseEngine databaseEngine;
 	
+	
 	@Test
 	public void testNotFound() throws Exception {
 		boolean thrown = false;
