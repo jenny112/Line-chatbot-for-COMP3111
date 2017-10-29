@@ -217,7 +217,7 @@ public class KitchenSinkController {
             throws Exception {
         String text = content.getText();
         try {
-        	InputStream inputStream = getClass().getResourceAsStream("/en-sent.bin");
+        	InputStream inputStream = this.getClass().getResourceAsStream("/static/en-sent.bin");
         	
         	if (inputStream == null)
         		throw new Exception("File wrong");
