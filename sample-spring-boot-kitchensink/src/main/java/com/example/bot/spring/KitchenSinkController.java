@@ -329,7 +329,11 @@ public class KitchenSinkController {
 		//Return Greeting message if client greets first
 		if (greeting)
 			return "Hi. How can I help you?";
-		return null;
+		String message = null;
+		for (String s: tags) {
+			message = message + s + " ";
+		}
+		return message;
 	}
 
 	static String createUri(String path) {
