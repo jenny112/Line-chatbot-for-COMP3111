@@ -308,16 +308,17 @@ public class KitchenSinkController {
 	
 	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
-		if (tokens == null || tags == null)
+		if (tokens == null || tags == null) {
+			this.reply(replyToken, "tokens/tags is null");
 			throw new Exception("Passing null arguments to searchForGreeting()");
-		
+		}
 		//Define greeting words
 		String greetingString = "hi hello yo";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i] == "_NNP") {
+			if (tags[i] == "NNP") {
 				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
