@@ -331,7 +331,7 @@ public class KitchenSinkController {
 			return "Hi. How can I help you?";
 		String message = null;
 		for (String s: tags) {
-			message = message + s + " ";
+			message = message + s;
 		}
 		message += "\n";
 		for (String s: tokens) {
