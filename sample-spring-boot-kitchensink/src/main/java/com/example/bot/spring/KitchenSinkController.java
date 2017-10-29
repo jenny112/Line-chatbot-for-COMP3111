@@ -367,8 +367,6 @@ public class KitchenSinkController {
 
 		}
 		
-		greeting = false;
-		
 		//Return Greeting message if client greets first
 		if (greeting)
 			return "Hi! How can I help you?";
