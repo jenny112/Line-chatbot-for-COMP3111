@@ -239,73 +239,29 @@ public class KitchenSinkController {
         String tags[] = tagger.tag(tokens);
         
         log.info("Got text message from {}: {}", replyToken, text);
-        switch (text) {
-            case "profile": {
-                String userId = event.getSource().getUserId();
-                if (userId != null) {
-                    lineMessagingClient
-                            .getProfile(userId)
-                            .whenComplete(new ProfileGetter (this, replyToken));
-                } else {
-                    this.replyText(replyToken, "Bot can't use profile API without user ID");
-                }
-                break;
-            }
-            case "confirm": {
-                ConfirmTemplate confirmTemplate = new ConfirmTemplate(
-                        "Do it?",
-                        new MessageAction("Yes", "Yes!"),
-                        new MessageAction("No", "No!")
-                );
-                TemplateMessage templateMessage = new TemplateMessage("Confirm alt text", confirmTemplate);
-                this.reply(replyToken, templateMessage);
-                break;
-            }
-            case "carousel": {
-                String imageUrl = createUri("/static/buttons/1040.jpg");
-                CarouselTemplate carouselTemplate = new CarouselTemplate(
-                        Arrays.asList(
-                                new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                        new URIAction("Go to line.me",
-                                                      "https://line.me"),
-                                        new PostbackAction("Say hello1",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭")
-                                )),
-                                new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                        new PostbackAction("�蝛∴蕭蹌� hello2",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭"),
-                                        new MessageAction("Say message",
-                                                          "Rice=��除蝟�")
-                                ))
-                        ));
-                TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
-                this.reply(replyToken, templateMessage);
-                break;
-            }
+        
+        //Reply
+		String reply = null;
+		try {
+			//reply = database.search(text);
+			
+			//Search keywords for greeting
+		    reply = searchForGreeting(tokens, tags);
+		    
+		    //If client is not greeting, reply don't have answer
+		    if (reply == null)
+		    	reply = notfound;
+		} catch (Exception e) {
+			this.replyText(replyToken, "tokens/tags is null");
+			System.err.println(e.getMessage());
+		} finally {
+			tokenis.close();
+			taggeris.close();
+		}
+		log.info("Returns echo message {}: {}", replyToken, reply);
+		this.replyText(replyToken, reply);
 
-            default:
-            	String reply = null;
-            	try {
-            		//reply = database.search(text);
-            		
-            		//Search keywords for greeting
-                    reply = searchForGreeting(tokens, tags);
-                    
-                    //If client is not greeting, reply don't have answer
-                    if (reply == null)
-                    	reply = notfound;
-            	} catch (Exception e) {
-        			this.replyText(replyToken, "tokens/tags is null");
-            		System.err.println(e.getMessage());
-            	}
-                log.info("Returns echo message {}: {}", replyToken, reply);
-                this.replyText(replyToken, reply);
-                break;
-        }
-        tokenis.close();
-        taggeris.close();
-    }
+	}
 	
 	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
