@@ -270,22 +270,81 @@ public class KitchenSinkController {
 		}
 		//Define greeting words
 		String greetingString = "hi hello yo";
+		String questionVerbs = "ask know";
+		String questionWords = "what when how where";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
+		boolean question = false;
+		boolean tour = false;
+		String adj = "";
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i].contains("PRP$") || tags[i].equals("UH") || tags[i].equals("nullUH")) {
-				if (greetingString.contains(tokens[i].toLowerCase())) {
-					greeting = true;
-					break;
+			//for greeting
+			if (!greeting) {
+				if (tags[i].equals("PRP$") || tags[i].equals("UH")) {
+					if (greetingString.contains(tokens[i].toLowerCase())) {
+						greeting = true;
+					}
 				}
 			}
+
+			//for questions
+			if (!question) {
+				if (tags[i].equals("VB")) {
+					if (questionVerbs.contains(tokens[i].toLowerCase())) {
+						question = true;
+						continue;
+					}
+				} else if (tags[i].equals("WP")) {
+					if (questionWords.contains(tokens[i].toLowerCase())) {
+						question = true;
+						continue;
+					}
+				}
+			}
+			if (question) {
+				//for display tour
+				if (tags[i].equals("NN") || tags[i].equals("NNS")) {
+					if (tokens[i].contains("tour")) {
+						tour = true;
+						//Search backwards for adj describing the tour
+						//e.g. "hot spring tour" <-- search for "hot spring"
+						for (int j = i - 1; j > -1; j--) {
+							if (tags[j].equals("NN") || tags[j].equals("JJ")) {
+								adj = tokens[j] + " " + adj;
+							} else {
+								break;
+							}
+						}
+						break;
+					}
+				}
+			}
+
 		}
+		
+		greeting = false;
 		
 		//Return Greeting message if client greets first
 		if (greeting)
 			return "Hi! How can I help you?";
-		return null;
+		else if (tour)
+			//Search for tour in db
+			//To be implemented...
+			return "Searching for " + adj + "tours...";
+		String message = printStringArray(tags);
+		message += printStringArray(tokens);
+		return message;
+	}
+	
+	//For debugging only
+	private String printStringArray(String[] stringArray) {
+		String message = "";
+		for (String s: stringArray) {
+			message = message + s + " ";
+		}
+		message += "\n";
+		return message;
 	}
 
 	static String createUri(String path) {
