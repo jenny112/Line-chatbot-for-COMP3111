@@ -333,6 +333,10 @@ public class KitchenSinkController {
 		for (String s: tags) {
 			message = message + s + " ";
 		}
+		message += "\n";
+		for (String s: tokens) {
+			message = message + s + " ";
+		}
 		return message;
 	}
 
