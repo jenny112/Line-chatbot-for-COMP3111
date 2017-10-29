@@ -217,8 +217,8 @@ public class KitchenSinkController {
             throws Exception {
         String text = content.getText();
         try {
-        	String path = new File("/sample-spring-boot-kitchensink/src/main/resources/static/en-sent.bin").getAbsolutePath();
-        	InputStream inputStream = new FileInputStream(path);
+        	InputStream inputStream = getClass().getResourceAsStream("/static/en-sent.bin");
+        	
         	if (inputStream == null)
         		throw new Exception("File wrong");
 	        SentenceModel model = new SentenceModel(inputStream);
