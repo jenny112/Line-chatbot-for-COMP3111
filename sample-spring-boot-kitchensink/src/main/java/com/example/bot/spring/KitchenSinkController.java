@@ -317,7 +317,7 @@ public class KitchenSinkController {
 		//Search for greeting words from client
 		boolean greeting = false;
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i] == "NNP") {
+			if (tags[i] == "_NNP") {
 				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
