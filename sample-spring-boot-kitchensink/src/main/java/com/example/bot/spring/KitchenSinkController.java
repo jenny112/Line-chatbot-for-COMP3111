@@ -216,12 +216,13 @@ public class KitchenSinkController {
             throws Exception {
         String text = content.getText();
         InputStream inputStream = new FileInputStream("en-sent.bin");
-        
-        SentenceModel model = new SentenceModel(inputStream);
-        SentenceDetectorME detector = new SentenceDetectorME(model);  
-        
-        //Detecting the sentence
-        String sentences[] = detector.sentDetect(text); 
+        if (inputStream != null) {
+	        SentenceModel model = new SentenceModel(inputStream);
+	        SentenceDetectorME detector = new SentenceDetectorME(model);  
+	        
+	        //Detecting the sentence
+	        String sentences[] = detector.sentDetect(text); 
+        }
         
         log.info("Got text message from {}: {}", replyToken, text);
         switch (text) {
@@ -274,12 +275,15 @@ public class KitchenSinkController {
             	try {
             		reply = database.search(text);
             	} catch (Exception e) {
-            		reply = text;
+            		if (inputStream != null)
+            			reply = sentences[0];
+            		else
+            			reply = text;
             	}
                 log.info("Returns echo message {}: {}", replyToken, reply);
                 this.replyText(
                         replyToken,
-                        itscLOGIN + " says " + sentences[0]
+                        itscLOGIN + " says " + reply
                 );
                 break;
         }
