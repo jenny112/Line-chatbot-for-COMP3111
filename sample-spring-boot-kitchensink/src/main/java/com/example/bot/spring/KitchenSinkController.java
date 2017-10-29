@@ -313,12 +313,12 @@ public class KitchenSinkController {
 			throw new Exception("Passing null arguments to searchForGreeting()");
 		}
 		//Define greeting words
-		String greetingString = "hi hello yo welcome";
+		String greetingString = "hi hello yo";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
 		for (int i = 0; i < tags.length; i++) {
-			if (tags[i].contains("PRP$") || tags[i].equals("UH")) {
+			if (tags[i].contains("PRP$") || tags[i].equals("UH") || tags[i].equals("nullUH")) {
 				if (greetingString.contains(tokens[i].toLowerCase())) {
 					greeting = true;
 					break;
@@ -328,16 +328,8 @@ public class KitchenSinkController {
 		
 		//Return Greeting message if client greets first
 		if (greeting)
-			return "Hi. How can I help you?";
-		String message = null;
-		for (String s: tags) {
-			message = message + s;
-		}
-		message += "\n";
-		for (String s: tokens) {
-			message = message + s + " ";
-		}
-		return message;
+			return "Hi! How can I help you?";
+		return null;
 	}
 
 	static String createUri(String path) {
