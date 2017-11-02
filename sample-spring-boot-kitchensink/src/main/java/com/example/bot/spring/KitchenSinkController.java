@@ -98,10 +98,10 @@ public class KitchenSinkController {
 	private static final int MAX_SEARCHED_TOURS = 10;
 	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
 	private boolean searchingTour = false;
-	private Tour[] searchedTours;
+//	private Tour[] searchedTours;
 	private int noOfSearchedTours = 0;
 	private boolean bookingTour = false;
-	private Tour[] bookingTours;
+//	private Tour[] bookingTours;
 	private int noOfBookingTours = 0;
 	
 	@Autowired
@@ -368,22 +368,22 @@ public class KitchenSinkController {
 	}
 	
 	//Search and print tours
-	private String searchForTours(String tourName) {
-		//Remove previous search record
-		searchedTours = new Tour[MAX_SEARCHED_TOURS];
-		
-		//To be implemented with database
-		//Hard-coded for now
-		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
-		
-		// Save searchedTours in array for later use
-		searchedTours[noOfSearchedTours] = t;
-		noOfSearchedTours++;
-		
-		String text = "We have 1 tour.\n";
-		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
-		return text;
-	}
+//	private String searchForTours(String tourName) {
+//		//Remove previous search record
+//		searchedTours = new Tour[MAX_SEARCHED_TOURS];
+//		
+//		//To be implemented with database
+//		//Hard-coded for now
+//		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
+//		
+//		// Save searchedTours in array for later use
+//		searchedTours[noOfSearchedTours] = t;
+//		noOfSearchedTours++;
+//		
+//		String text = "We have 1 tour.\n";
+//		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
+//		return text;
+//	}
 	
 	//For debugging only
 	private String printStringArray(String[] stringArray) {
