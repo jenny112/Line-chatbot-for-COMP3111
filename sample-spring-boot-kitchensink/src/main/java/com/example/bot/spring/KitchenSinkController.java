@@ -97,9 +97,13 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
+	private static final int MAX_SEARCHED_TOURS = 10;
+	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
+	private boolean searchingTour = false;
+	private Tour[] searchedTours = new Tour[MAX_SEARCHED_TOURS];
+	private int noOfSearchedTours = 0;
 	
-	private static final String notfound = "Sorry, we don't have answer for this";
-
+	
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
@@ -246,11 +250,11 @@ public class KitchenSinkController {
 			//reply = database.search(text);
 			
 			//Search keywords for greeting
-		    reply = searchForGreeting(tokens, tags);
+		    reply = searchForKeywords(tokens, tags);
 		    
 		    //If client is not greeting, reply don't have answer
 		    if (reply == null)
-		    	reply = notfound;
+		    	reply = NOT_FOUND;
 		} catch (Exception e) {
 			this.replyText(replyToken, "tokens/tags is null");
 			System.err.println(e.getMessage());
@@ -263,10 +267,10 @@ public class KitchenSinkController {
 
 	}
 	
-	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
+	private String searchForKeywords(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
 		if (tokens == null || tags == null) {
-			throw new Exception("Passing null arguments to searchForGreeting()");
+			throw new Exception("Passing null arguments to searchForKeywords()");
 		}
 		//Define greeting words
 		String greetingString = "hi hello yo";
@@ -329,10 +333,29 @@ public class KitchenSinkController {
 		else if (tour)
 			//Search for tour in db
 			//To be implemented...
-			return "Searching for " + adj + "tours...";
+			return searchForTours(adj);
+//		return "Searching for " + adj + "tours...";
 		String message = printStringArray(tags);
 		message += printStringArray(tokens);
 		return message;
+	}
+	
+	//Search and print tours
+	private String searchForTours(String tourName) {
+		//Remove previous search record
+		searchedTours = new Tour[MAX_SEARCHED_TOURS];
+		
+		//To be implemented with database
+		//Hard-coded for now
+		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
+		
+		// Save searchedTours in array for later use
+		searchedTours[noOfSearchedTours] = t;
+		noOfSearchedTours++;
+		
+		String text = "We have 1 tour.\n";
+		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
+		return text;
 	}
 	
 	//For debugging only
