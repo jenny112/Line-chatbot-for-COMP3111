@@ -286,18 +286,19 @@ public class KitchenSinkController {
 		
 		//If client is searching for tours
 		if (searchingTour) {
-			for (int i = 0; i < tags.length; i++) {
-				// Check which tour client wants to book
-				if (tags[i].equals("CD")) {
-					int tourIdInChatBot = Integer.parseInt(tokens[i]);
-					Tour t = searchedTours[tourIdInChatBot];
-					//Store the tour in bookingTours array
-					bookingTours[noOfBookingTours] = t;
-					noOfBookingTours++;
-					bookingTour = true;
-					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
-				}
-			}
+//			for (int i = 0; i < tags.length; i++) {
+//				// Check which tour client wants to book
+//				if (tags[i].equals("CD")) {
+//					int tourIdInChatBot = Integer.parseInt(tokens[i]);
+//					Tour t = searchedTours[tourIdInChatBot];
+//					//Store the tour in bookingTours array
+//					bookingTours[noOfBookingTours] = t;
+//					noOfBookingTours++;
+//					bookingTour = true;
+//					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
+//				}
+//			}
+			return "searchingTour";
 		} // If client is booking tours
 		else if (bookingTour) {
 			return "bookingTour";
@@ -377,7 +378,6 @@ public class KitchenSinkController {
 		// Save searchedTours in array for later use
 		searchedTours[noOfSearchedTours] = t;
 		noOfSearchedTours++;
-		
 		
 		String text = "We have 1 tour.\n";
 		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
