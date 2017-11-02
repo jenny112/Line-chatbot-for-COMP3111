@@ -95,15 +95,9 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
-	private static final int MAX_SEARCHED_TOURS = 10;
-	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
-	private boolean searchingTour = false;
-//	private Tour[] searchedTours;
-	private int noOfSearchedTours = 0;
-	private boolean bookingTour = false;
-//	private Tour[] bookingTours;
-	private int noOfBookingTours = 0;
-	
+
+	private static final String notfound = "Sorry, we don't have answer for this";
+
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
@@ -250,15 +244,15 @@ public class KitchenSinkController {
     		reply = database.search(text);
     		
     		if (reply == null) {
-	    		//Search keywords
-			    reply = searchForKeywords(tokens, tags);
+	    		//Search keywords for greeting
+			    reply = searchForGreeting(tokens, tags);
 			    
 			    //If client is not greeting, reply don't have answer
 			    if (reply == null)
-			    	reply = NOT_FOUND;
+			    	reply = notfound;
     		}
     	} catch (Exception e) {
-			this.replyText(replyToken, e.getMessage());
+			this.replyText(replyToken, "tokens/tags is null");
     	} finally {
 			tokenis.close();
 			taggeris.close();
@@ -268,7 +262,7 @@ public class KitchenSinkController {
 		this.replyText(replyToken, reply);
     }
 	
-	private String searchForKeywords(String[] tokens, String[] tags) throws Exception {
+	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
 		if (tokens == null || tags == null) {
 			throw new Exception("Passing null arguments to searchForGreeting()");
@@ -283,28 +277,7 @@ public class KitchenSinkController {
 		boolean question = false;
 		boolean tour = false;
 		String adj = "";
-		
-		//If client is searching for tours
-		if (searchingTour) {
-//			for (int i = 0; i < tags.length; i++) {
-//				// Check which tour client wants to book
-//				if (tags[i].equals("CD")) {
-//					int tourIdInChatBot = Integer.parseInt(tokens[i]);
-//					Tour t = searchedTours[tourIdInChatBot];
-//					//Store the tour in bookingTours array
-//					bookingTours[noOfBookingTours] = t;
-//					noOfBookingTours++;
-//					bookingTour = true;
-//					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
-//				}
-//			}
-			return "searchingTour";
-		} // If client is booking tours
-		else if (bookingTour) {
-			return "bookingTour";
-		}
-		
-		for (int i = 0; i < tags.length; i++) {			
+		for (int i = 0; i < tags.length; i++) {
 			//for greeting
 			if (!greeting) {
 				if (tags[i].equals("PRP$") || tags[i].equals("UH")) {
@@ -350,15 +323,13 @@ public class KitchenSinkController {
 		}
 		
 		//Return Greeting message if client greets first
-		if (greeting) {
+		if (greeting)
 			return "Hi! How can I help you?";
-		} else if (tour) {
+		else if (tour)
 			//Search for tour in db
 			//To be implemented...
-			searchingTour = true;
-			//return searchForTours(adj);
-			return "searchForTours(adj)";
-		}
+			return "Searching for " + adj + "tours...";
+		
 		//For debugging only
 //		String message = printStringArray(tags);
 //		message += printStringArray(tokens);
@@ -366,24 +337,6 @@ public class KitchenSinkController {
 		//If not found
 		return null;
 	}
-	
-	//Search and print tours
-//	private String searchForTours(String tourName) {
-//		//Remove previous search record
-//		searchedTours = new Tour[MAX_SEARCHED_TOURS];
-//		
-//		//To be implemented with database
-//		//Hard-coded for now
-//		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
-//		
-//		// Save searchedTours in array for later use
-//		searchedTours[noOfSearchedTours] = t;
-//		noOfSearchedTours++;
-//		
-//		String text = "We have 1 tour.\n";
-//		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
-//		return text;
-//	}
 	
 	//For debugging only
 	private String printStringArray(String[] stringArray) {
