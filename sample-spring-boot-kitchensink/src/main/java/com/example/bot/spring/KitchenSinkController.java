@@ -304,7 +304,6 @@ public class KitchenSinkController {
 					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
 				}
 			}
-			return "Please enter valid tour number.";
 		} // If client is booking tours
 		else if (bookingTour) {
 			return "bookingTour";
