@@ -16,10 +16,8 @@
 
 package com.example.bot.spring;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -97,9 +95,15 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
+	private static final int MAX_SEARCHED_TOURS = 10;
+	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
+	private boolean searchingTour = false;
+	private Tour[] searchedTours;
+	private int noOfSearchedTours = 0;
+	private boolean bookingTour = false;
+	private Tour[] bookingTours;
+	private int noOfBookingTours = 0;
 	
-	private static final String notfound = "Sorry, we don't have answer for this";
-
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
@@ -239,75 +243,32 @@ public class KitchenSinkController {
         String tags[] = tagger.tag(tokens);
         
         log.info("Got text message from {}: {}", replyToken, text);
-        switch (text) {
-            case "profile": {
-                String userId = event.getSource().getUserId();
-                if (userId != null) {
-                    lineMessagingClient
-                            .getProfile(userId)
-                            .whenComplete(new ProfileGetter (this, replyToken));
-                } else {
-                    this.replyText(replyToken, "Bot can't use profile API without user ID");
-                }
-                break;
-            }
-            case "confirm": {
-                ConfirmTemplate confirmTemplate = new ConfirmTemplate(
-                        "Do it?",
-                        new MessageAction("Yes", "Yes!"),
-                        new MessageAction("No", "No!")
-                );
-                TemplateMessage templateMessage = new TemplateMessage("Confirm alt text", confirmTemplate);
-                this.reply(replyToken, templateMessage);
-                break;
-            }
-            case "carousel": {
-                String imageUrl = createUri("/static/buttons/1040.jpg");
-                CarouselTemplate carouselTemplate = new CarouselTemplate(
-                        Arrays.asList(
-                                new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                        new URIAction("Go to line.me",
-                                                      "https://line.me"),
-                                        new PostbackAction("Say hello1",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭")
-                                )),
-                                new CarouselColumn(imageUrl, "hoge", "fuga", Arrays.asList(
-                                        new PostbackAction("�蝛∴蕭蹌� hello2",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭",
-                                                           "hello ���酗嚙踐�蕭嚙踐垠嚙踐�蕭���宏嚙賢��縛嚙賢��蕭"),
-                                        new MessageAction("Say message",
-                                                          "Rice=��除蝟�")
-                                ))
-                        ));
-                TemplateMessage templateMessage = new TemplateMessage("Carousel alt text", carouselTemplate);
-                this.reply(replyToken, templateMessage);
-                break;
-            }
-
-            default:
-            	String reply = null;
-            	try {
-            		//reply = database.search(text);
-            		
-            		//Search keywords for greeting
-                    reply = searchForGreeting(tokens, tags);
-                    
-                    //If client is not greeting, reply don't have answer
-                    if (reply == null)
-                    	reply = notfound;
-            	} catch (Exception e) {
-        			this.replyText(replyToken, "tokens/tags is null");
-            		System.err.println(e.getMessage());
-            	}
-                log.info("Returns echo message {}: {}", replyToken, reply);
-                this.replyText(replyToken, reply);
-                break;
-        }
-        tokenis.close();
-        taggeris.close();
+        
+        //reply
+    	String reply = null;
+    	try {
+    		reply = database.search(text);
+    		
+    		if (reply == null) {
+	    		//Search keywords
+			    reply = searchForKeywords(tokens, tags);
+			    
+			    //If client is not greeting, reply don't have answer
+			    if (reply == null)
+			    	reply = NOT_FOUND;
+    		}
+    	} catch (Exception e) {
+			this.replyText(replyToken, "tokens/tags is null");
+    	} finally {
+			tokenis.close();
+			taggeris.close();
+		}
+    	
+        log.info("Returns echo message {}: {}", replyToken, reply);
+		this.replyText(replyToken, reply);
     }
 	
-	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
+	private String searchForKeywords(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
 		if (tokens == null || tags == null) {
 			throw new Exception("Passing null arguments to searchForGreeting()");
@@ -315,14 +276,34 @@ public class KitchenSinkController {
 		//Define greeting words
 		String greetingString = "hi hello yo";
 		String questionVerbs = "ask know";
-		String questionWords = "what when how where";
+		String questionWords = "what when how where any";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
 		boolean question = false;
 		boolean tour = false;
 		String adj = "";
-		for (int i = 0; i < tags.length; i++) {
+		
+		//If client is searching for tours
+		if (searchingTour) {
+			for (int i = 0; i < tags.length; i++) {
+				// Check which tour client wants to book
+				if (tags[i].equals("CD")) {
+					int tourIdInChatBot = Integer.parseInt(tokens[i]);
+					Tour t = searchedTours[tourIdInChatBot];
+					//Store the tour in bookingTours array
+					bookingTours[noOfBookingTours] = t;
+					noOfBookingTours++;
+					bookingTour = true;
+					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
+				}
+			}
+		} // If client is booking tours
+		else if (bookingTour) {
+			return "bookingTour";
+		}
+		
+		for (int i = 0; i < tags.length; i++) {			
 			//for greeting
 			if (!greeting) {
 				if (tags[i].equals("PRP$") || tags[i].equals("UH")) {
@@ -339,7 +320,7 @@ public class KitchenSinkController {
 						question = true;
 						continue;
 					}
-				} else if (tags[i].equals("WP")) {
+				} else if (tags[i].equals("WP") || tags[i].equals("DT")) {
 					if (questionWords.contains(tokens[i].toLowerCase())) {
 						question = true;
 						continue;
@@ -368,15 +349,39 @@ public class KitchenSinkController {
 		}
 		
 		//Return Greeting message if client greets first
-		if (greeting)
+		if (greeting) {
 			return "Hi! How can I help you?";
-		else if (tour)
+		} else if (tour) {
 			//Search for tour in db
 			//To be implemented...
-			return "Searching for " + adj + "tours...";
-		String message = printStringArray(tags);
-		message += printStringArray(tokens);
-		return message;
+			searchingTour = true;
+			return searchForTours(adj);
+		}
+		//For debugging only
+//		String message = printStringArray(tags);
+//		message += printStringArray(tokens);
+		
+		//If not found
+		return null;
+	}
+	
+	//Search and print tours
+	private String searchForTours(String tourName) {
+		//Remove previous search record
+		searchedTours = new Tour[MAX_SEARCHED_TOURS];
+		
+		//To be implemented with database
+		//Hard-coded for now
+		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
+		
+		// Save searchedTours in array for later use
+		searchedTours[noOfSearchedTours] = t;
+		noOfSearchedTours++;
+		
+		
+		String text = "We have 1 tour.\n";
+		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
+		return text;
 	}
 	
 	//For debugging only
