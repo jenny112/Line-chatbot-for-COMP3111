@@ -16,10 +16,10 @@
 
 package com.example.bot.spring;
 
-import java.io.File;
+import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
+import java.io.PrintWriter;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -261,8 +261,9 @@ public class KitchenSinkController {
 		    if (reply == null)
 		    	reply = NOT_FOUND;
 		} catch (Exception e) {
-			this.replyText(replyToken, "tokens/tags is null");
-			System.err.println(e.getMessage());
+			StringWriter sw = new StringWriter();
+			e.printStackTrace(new PrintWriter(sw));
+			this.replyText(replyToken, sw.toString());
 		} finally {
 			tokenis.close();
 			taggeris.close();
