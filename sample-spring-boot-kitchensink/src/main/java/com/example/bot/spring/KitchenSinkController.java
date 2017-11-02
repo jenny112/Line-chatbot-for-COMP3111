@@ -258,7 +258,7 @@ public class KitchenSinkController {
 			    	reply = NOT_FOUND;
     		}
     	} catch (Exception e) {
-			this.replyText(replyToken, "tokens/tags is null");
+			this.replyText(replyToken, e.getMessage());
     	} finally {
 			tokenis.close();
 			taggeris.close();
