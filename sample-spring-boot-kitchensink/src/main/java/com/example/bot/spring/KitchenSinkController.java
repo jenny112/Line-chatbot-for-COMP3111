@@ -16,8 +16,10 @@
 
 package com.example.bot.spring;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -95,7 +97,7 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
-
+	
 	private static final String notfound = "Sorry, we don't have answer for this";
 
 	@Autowired
@@ -238,29 +240,28 @@ public class KitchenSinkController {
         
         log.info("Got text message from {}: {}", replyToken, text);
         
-        //reply
-    	String reply = null;
-    	try {
-    		reply = database.search(text);
-    		
-    		if (reply == null) {
-	    		//Search keywords for greeting
-			    reply = searchForGreeting(tokens, tags);
-			    
-			    //If client is not greeting, reply don't have answer
-			    if (reply == null)
-			    	reply = notfound;
-    		}
-    	} catch (Exception e) {
+        //Reply
+		String reply = null;
+		try {
+			//reply = database.search(text);
+			
+			//Search keywords for greeting
+		    reply = searchForGreeting(tokens, tags);
+		    
+		    //If client is not greeting, reply don't have answer
+		    if (reply == null)
+		    	reply = notfound;
+		} catch (Exception e) {
 			this.replyText(replyToken, "tokens/tags is null");
-    	} finally {
+			System.err.println(e.getMessage());
+		} finally {
 			tokenis.close();
 			taggeris.close();
 		}
-    	
-        log.info("Returns echo message {}: {}", replyToken, reply);
+		log.info("Returns echo message {}: {}", replyToken, reply);
 		this.replyText(replyToken, reply);
-    }
+
+	}
 	
 	private String searchForGreeting(String[] tokens, String[] tags) throws Exception {
 		//Check if tokens and tags are not null
@@ -270,7 +271,7 @@ public class KitchenSinkController {
 		//Define greeting words
 		String greetingString = "hi hello yo";
 		String questionVerbs = "ask know";
-		String questionWords = "what when how where any";
+		String questionWords = "what when how where";
 		
 		//Search for greeting words from client
 		boolean greeting = false;
@@ -294,7 +295,7 @@ public class KitchenSinkController {
 						question = true;
 						continue;
 					}
-				} else if (tags[i].equals("WP") || tags[i].equals("DT")) {
+				} else if (tags[i].equals("WP")) {
 					if (questionWords.contains(tokens[i].toLowerCase())) {
 						question = true;
 						continue;
@@ -329,13 +330,9 @@ public class KitchenSinkController {
 			//Search for tour in db
 			//To be implemented...
 			return "Searching for " + adj + "tours...";
-		
-		//For debugging only
-//		String message = printStringArray(tags);
-//		message += printStringArray(tokens);
-		
-		//If not found
-		return null;
+		String message = printStringArray(tags);
+		message += printStringArray(tokens);
+		return message;
 	}
 	
 	//For debugging only
