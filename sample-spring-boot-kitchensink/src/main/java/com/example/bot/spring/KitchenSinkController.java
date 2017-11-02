@@ -371,8 +371,11 @@ public class KitchenSinkController {
 	
 	//Search and print tours
 	private String searchForTours(String tourName) {
-		//Remove previous search record
+		//Remove previous search and booking record
 		searchedTours = new Tour[MAX_SEARCHED_TOURS];
+		noOfSearchedTours = 0;
+		bookingTours = new Tour[MAX_BOOKING_TOURS];
+		noOfBookingTours = 0;
 		
 		//To be implemented with database
 		//Hard-coded for now
