@@ -251,7 +251,7 @@ public class KitchenSinkController {
         log.info("Got text message from {}: {}", replyToken, text);
         
         //Reply
-		String reply = null;
+		String reply = "";
 		try {
 			//reply = database.search(text);
 			
@@ -275,9 +275,10 @@ public class KitchenSinkController {
 		    }
 		    
 		    //If client is not greeting, reply don't have answer
-		    if (reply == null)
+		    if (reply.equals(""))
 		    	reply = NOT_FOUND;
 		} catch (Exception e) {
+			//For debug use only
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			this.replyText(replyToken, sw.toString());
@@ -287,7 +288,6 @@ public class KitchenSinkController {
 		}
 		log.info("Returns echo message {}: {}", replyToken, reply);
 		this.replyText(replyToken, reply);
-
 	}
 	
 	private String searchForKeywords(String[] tokens, String[] tags) throws Exception {
@@ -324,6 +324,7 @@ public class KitchenSinkController {
 			}
 		} // If client is booking tours
 		else if (bookingTour) {
+			bookingTour = false;
 			return "bookingTour";
 		}
 		
@@ -408,7 +409,7 @@ public class KitchenSinkController {
 		return text;
 	}
 	
-	//For debugging only
+	//For debug use only
 	private String printStringArray(String[] stringArray) {
 		String message = "";
 		for (String s: stringArray) {
