@@ -261,7 +261,13 @@ public class KitchenSinkController {
 		    //When asking confirm from client to choose tour
 		    if (reply.equals("askingConfirmToChooseTour")) {
 		    	TextMessage message1 = new TextMessage(bookingTours[noOfBookingTours - 1].toString() + ". We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399");
-		    	TextMessage message2 = new TextMessage("Do you want to book this one?");
+		    	//TextMessage message2 = new TextMessage("Do you want to book this one?");
+		    	ConfirmTemplate confirmTemplate = new ConfirmTemplate(
+		    			"Do you want to book this one?", 
+		    			new MessageAction("Yes", ":)"), 
+		    			new MessageAction("No", ":(")
+		    	);
+		    	TemplateMessage message2 = new TemplateMessage("Do you want to book this one?", confirmTemplate);
 		    	ArrayList<Message> messages = new ArrayList<Message>();
 		    	messages.add(message1);
 		    	messages.add(message2);
