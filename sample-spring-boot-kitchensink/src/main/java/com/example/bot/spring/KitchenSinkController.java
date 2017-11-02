@@ -98,10 +98,15 @@ import opennlp.tools.tokenize.TokenizerModel;
 @LineMessageHandler
 public class KitchenSinkController {
 	private static final int MAX_SEARCHED_TOURS = 10;
+	private static final int MAX_BOOKING_TOURS = 10;
 	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
 	private boolean searchingTour = false;
 	private Tour[] searchedTours = new Tour[MAX_SEARCHED_TOURS];
 	private int noOfSearchedTours = 0;
+	
+	private boolean bookingTour = false;
+	private Tour[] bookingTours = new Tour[MAX_BOOKING_TOURS];
+	private int noOfBookingTours = 0;
 	
 	
 	@Autowired
@@ -282,6 +287,23 @@ public class KitchenSinkController {
 		boolean question = false;
 		boolean tour = false;
 		String adj = "";
+		
+		//If client is searching for tours
+		if (searchingTour) {
+			for (int i = 0; i < tags.length; i++) {
+				// Check which tour client wants to book
+				if (tags[i].equals("CD")) {
+					int tourIdInChatBot = Integer.parseInt(tokens[i]);
+					Tour t = searchedTours[tourIdInChatBot];
+					//Store the tour in bookingTours array
+					bookingTours[noOfBookingTours] = t;
+					noOfBookingTours++;
+					bookingTour = true;
+					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
+				}
+			}
+		}
+		
 		for (int i = 0; i < tags.length; i++) {
 			//for greeting
 			if (!greeting) {
@@ -328,12 +350,14 @@ public class KitchenSinkController {
 		}
 		
 		//Return Greeting message if client greets first
-		if (greeting)
+		if (greeting) {
 			return "Hi! How can I help you?";
-		else if (tour)
+		} else if (tour) {
 			//Search for tour in db
 			//To be implemented...
+			searchingTour = true;
 			return searchForTours(adj);
+		}
 //		return "Searching for " + adj + "tours...";
 		String message = printStringArray(tags);
 		message += printStringArray(tokens);
