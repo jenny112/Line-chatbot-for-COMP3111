@@ -312,6 +312,9 @@ public class KitchenSinkController {
 				// Check which tour client wants to book
 				if (tags[i].equals("CD")) {
 					int tourIdInChatBot = Integer.parseInt(tokens[i]);
+					if (tourIdInChatBot > noOfSearchedTours) {
+						break;
+					}
 					Tour t = searchedTours[tourIdInChatBot - 1];
 					//Store the tour in bookingTours array
 					bookingTours[noOfBookingTours] = t;
@@ -406,6 +409,7 @@ public class KitchenSinkController {
 		
 		String text = "We have 1 tour.\n";
 		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
+		text += "\n Please indicate the corresponding tour number to book the tour.";
 		return text;
 	}
 	
