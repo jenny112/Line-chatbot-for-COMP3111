@@ -356,7 +356,8 @@ public class KitchenSinkController {
 			//Search for tour in db
 			//To be implemented...
 			searchingTour = true;
-			return searchForTours(adj);
+			//return searchForTours(adj);
+			return "searchForTours(adj)";
 		}
 		//For debugging only
 //		String message = printStringArray(tags);
