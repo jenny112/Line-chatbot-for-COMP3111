@@ -16,6 +16,7 @@
 
 package com.example.bot.spring;
 
+import java.util.ArrayList;
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -257,6 +258,16 @@ public class KitchenSinkController {
 			//Search keywords for greeting
 		    reply = searchForKeywords(tokens, tags);
 		    
+		    //When asking confirm from client to choose tour
+		    if (reply.equals("askingConfirmToChooseTour")) {
+		    	TextMessage message1 = new TextMessage(bookingTours[noOfBookingTours - 1].toString() + ". We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399");
+		    	TextMessage message2 = new TextMessage("Do you want to book this one?");
+		    	ArrayList<Message> messages = new ArrayList<Message>();
+		    	messages.add(message1);
+		    	messages.add(message2);
+		    	this.reply(replyToken, messages);
+		    }
+		    
 		    //If client is not greeting, reply don't have answer
 		    if (reply == null)
 		    	reply = NOT_FOUND;
@@ -301,7 +312,8 @@ public class KitchenSinkController {
 					noOfBookingTours++;
 					searchingTour = false;
 					bookingTour = true;
-					return t.toString() + "We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
+					return "askingConfirmToChooseTour";
+					//return t.toString() + ". We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
 				}
 			}
 		} // If client is booking tours
