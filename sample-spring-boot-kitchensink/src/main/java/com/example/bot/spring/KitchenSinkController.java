@@ -126,7 +126,7 @@ public class KitchenSinkController {
 	private static final String HOTEL_BED = "All rooms are twin beds. Every customer needs to share a room with another customer. If a customer prefer to own a room by himself/herself, additional charge of 30% will be applied.";
 	private static final String VISA = "Please refer the Visa issue to the immigration department of China. The tour are assembled and dismissed in mainland and no cross-border is needed. However, you will need a travelling document when you check in the hotel.";
 	private static final String SWIMMING_SUIT = "Yes you do need it. Otherwise you may not use the facility.";
-	private static final String VEGETERIAN = "Sorry, we don't serve vegeterian.";
+	private static final String VEGETARIAN = "Sorry, we don't serve vegetarian.";
 	private static final String CHILDREN_TOUR_FEE = "Age below 3 (including 3) is free. Age between 4 to 11 (including 4 and 11) has a discount of 20% off. Otherwise full fee applies. The same service charge is applied to all age customers.";
 	private static final String LATE = "You shall contact the tour guide if you know you will be late and see if the tour guide can wait a little bit longer. No refund or make up shall be made if a customer is late for the tour.";
 	
@@ -500,7 +500,9 @@ public class KitchenSinkController {
 		// FAQ 5: Transportation in Guangdong
 		String[] faq5 = {"transportation", "transport", "go", "goes"};
 		if (containQW[0] || containQW[3]) {
+			log.info("text: ", text);
 			if (text.contains("guangdong")) {
+				log.info("Entered in FAQ 5 loop");
 				for (int i = 0; i < tokens.length; i++) {
 					for (String s: faq5) {
 						if (tokens[i].equals(faq5))
@@ -563,7 +565,7 @@ public class KitchenSinkController {
 		String faq11 = "vegetarian";
 		if (containQW[4] || containQW[5] || containQW[8] || containQW[9]) {
 			if (text.contains(faq11))
-				return VEGETERIAN;
+				return VEGETARIAN;
 		}
 		
 		// FAQ 12: Children fee
@@ -583,6 +585,7 @@ public class KitchenSinkController {
 			} else {
 				for (int i = 0; i < tokens.length; i++) {
 					if (!faq12First) {
+						log.info("Entered in FAQ 12 first loop");
 						for (String s: faq121) {
 							if (tokens[i].equals(s)) {
 								faq12First = true;
@@ -591,6 +594,7 @@ public class KitchenSinkController {
 						}
 					}
 					if (!faq12Second) {
+						log.info("Entered in FAQ 12 second loop");
 						for (String s: faq122) {
 							if (tokens[i].equals(s)) {
 								faq12Second = true;
@@ -598,8 +602,10 @@ public class KitchenSinkController {
 							}
 						}
 					}
-					if (faq12First && faq12Second)
+					if (faq12First && faq12Second) {
+						log.info("faq12: both satisfied, break;");
 						break;
+					}
 				}
 			}
 			if (faq12First && faq12Second) {
@@ -611,6 +617,7 @@ public class KitchenSinkController {
 		String[] faq13 = {"leave", "depart", "departure", "leaving"};
 		if (containQW[0] || containQW[4] || containQW[5] || containQW[6] || containQW[7] || containQW[8] || containQW[9]) {
 			if (text.contains("late")) {
+				log.info("Entered in FAQ 13 loop");
 				for (int i = 0; i < tokens.length; i++) {
 					for (String s: faq13) {
 						if (tokens[i].equals(faq13))
