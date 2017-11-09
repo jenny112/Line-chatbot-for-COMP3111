@@ -504,6 +504,7 @@ public class KitchenSinkController {
 			if (text.contains("guangdong")) {
 				log.info("Entered in FAQ 5 loop");
 				for (int i = 0; i < tokens.length; i++) {
+					log.info("tokens[{}]: {}", i, tokens[i]);
 					for (String s: faq5) {
 						if (tokens[i].equals(faq5))
 							return TRANSPORTATION;
@@ -569,7 +570,7 @@ public class KitchenSinkController {
 		}
 		
 		// FAQ 12: Children fee
-		String[] faq121 = {"fee, charge, price, cost"};
+		String[] faq121 = {"fee", "charge", "price", "cost"};
 		boolean faq12First = false;
 		String[] faq122 = {"kid", "child", "toodler", "kids", "toodlers", "children"};
 		boolean faq12Second = false;
@@ -584,8 +585,8 @@ public class KitchenSinkController {
 				}
 			} else {
 				for (int i = 0; i < tokens.length; i++) {
+					
 					if (!faq12First) {
-						log.info("Entered in FAQ 12 first loop");
 						for (String s: faq121) {
 							if (tokens[i].equals(s)) {
 								faq12First = true;
@@ -594,7 +595,6 @@ public class KitchenSinkController {
 						}
 					}
 					if (!faq12Second) {
-						log.info("Entered in FAQ 12 second loop");
 						for (String s: faq122) {
 							if (tokens[i].equals(s)) {
 								faq12Second = true;
@@ -603,7 +603,6 @@ public class KitchenSinkController {
 						}
 					}
 					if (faq12First && faq12Second) {
-						log.info("faq12: both satisfied, break;");
 						break;
 					}
 				}
@@ -619,6 +618,7 @@ public class KitchenSinkController {
 			if (text.contains("late")) {
 				log.info("Entered in FAQ 13 loop");
 				for (int i = 0; i < tokens.length; i++) {
+					log.info("tokens[{}]: {}", i, tokens[i]);
 					for (String s: faq13) {
 						if (tokens[i].equals(faq13))
 							return LATE;
