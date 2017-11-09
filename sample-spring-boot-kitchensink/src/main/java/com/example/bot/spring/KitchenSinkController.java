@@ -416,6 +416,7 @@ public class KitchenSinkController {
 				containQW[i] = true;
 			}
 		}
+		log.info("containQW: {} =>  {}", containQW.toString());
 		
 		// FAQ 1: How to apply?
 		String faq1 = "apply";
@@ -602,7 +603,7 @@ public class KitchenSinkController {
 				}
 			}
 		}
-		
+		status = -1;
 		return "";
 	}
 	
