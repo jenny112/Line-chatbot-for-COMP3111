@@ -343,7 +343,7 @@ public class KitchenSinkController {
 
 		switch (status) {
 			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); customer.setStatus(-2); break;	//Greeting
-			case 1: this.reply(replyToken, searchForFAQ(text, tokens, tags)); break; //Search FAQ
+			case 1: this.reply(replyToken, searchForFAQ(text.toLowerCase(), tokens, tags)); break; //Search FAQ
 			case 2: this.reply(replyToken, searchTour(text, tokens, tags)); break; //Search tour
 			case 3: this.reply(replyToken, bookingProcess(text.toLowerCase())); break; //Book tour
 			case 4: this.reply(replyToken, searchPreviousRecord()); break; //Search previous record
@@ -455,6 +455,7 @@ public class KitchenSinkController {
 	/****************************************************************Search FAQ***********************************************************************************/
 	/*************************************************************************************************************************************************************/
 	private ArrayList<Message> searchForFAQ(String text, String[] tokens, String[] tags) throws Exception {
+		log.info("Entered FAQ");
 		ArrayList<Message> messages = new ArrayList<Message>();
 		String[] faq9 = {"visa", "pass", "passport"};
 		// FAQ 9: VISA
