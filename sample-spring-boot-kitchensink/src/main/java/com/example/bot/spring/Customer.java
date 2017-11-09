@@ -1,12 +1,17 @@
 package com.example.bot.spring;
 
+import java.util.ArrayList;
+
 public class Customer {
     private String customerID;
     private String name;
     private String phoneNo;
     private int age;
     private String lineID;
+    
     private int status;
+    private InProgressBooking booking;
+    private ArrayList<Tour> tourArrTemp;
 
     public Customer() {
         this.name = null;
@@ -15,6 +20,10 @@ public class Customer {
         this.phoneNo = null;
         this.age = -1;
         this.status = -2;
+
+        status = -2;
+        booking = new InProgressBooking();
+        tourArrTemp = new ArrayList<Tour>();
     }
 
     public String getCustomerID() {
@@ -63,6 +72,22 @@ public class Customer {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+    
+    public InProgressBooking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(InProgressBooking booking) {
+        this.booking = booking;
+    }
+
+    public ArrayList<Tour> getTourArr() {
+        return tourArrTemp;
+    }
+
+    public void setTourArr(ArrayList<Tour> tourArrTemp) {
+        this.tourArrTemp = tourArrTemp;
     }
 
 }

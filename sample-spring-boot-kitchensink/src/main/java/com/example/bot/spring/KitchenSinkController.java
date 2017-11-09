@@ -16,7 +16,6 @@
 
 package com.example.bot.spring;
 
-
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,7 +93,6 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
-import java.net.URL;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSSample;
@@ -103,6 +101,9 @@ import opennlp.tools.tokenize.Tokenizer;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.tokenize.TokenizerModel;
 
+import java.lang.NumberFormatException;
+import java.text.DecimalFormat;
+
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
@@ -110,15 +111,15 @@ public class KitchenSinkController {
 /*	private static final int MAX_SEARCHED_TOURS = 15;
 	private static final int MAX_BOOKING_TOURS = 15;
 	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
-	private static final String CONFIRMED_BOOKING = "Thank you. Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
+	private static final String CONFIRMED_BOOKING_PAYMENT = "Thank you. Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
 	private static final String NO_TOUR_RETURNED_FROM_DB = "Sorry, there is no matching tours.";
 */	
 
-	private static final String CONFIRMED_BOOKING = "Thank you. Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
+	private static final String CONFIRMED_BOOKING_PAYMENT = "Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
 
 	//FAQ answers
 	private static final String HOW_TO_APPLY = "Customers shall approach the company by phone or visit our store (in Clearwater bay) with the choosen tour code and departure date. If it is not full, customers will be advised by the staff to pay the tour fee. Tour fee is non refundable. Customer can pay their fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. Customer shall send their pay-in slip to us by email or LINE.";
-	private static final String GATHERING_POINT = "We gather at the gathering spot \"Exit A, Futian port, Shenzhen\" at 8:00AM on the departure date. We dismiss at the same spot after the tour. ";
+	private static final String GATHERING_POINT = "We gather at the gathering spot \"Exit A, Futian port, Shenzhen\" at 8:00AM on the departure date. We dismiss at the same spot after the tour. \n(See the below picture.)";
 	private static final String CANCELLED_TOUR = "In case a tour has not enough people or bad weather condition and the tour is forced to cancel, customers will be informed 3 days in advanced. Either change to another tour or refund is avaliable for customers to select. However, due to other reasons such as customers' personal problem no refund can be made.";
 	private static final String ADDITIONAL_CHARGE = "Each customer need to pay an additional service charge at the rate $60/day/person, on top of the tour fee. It is collected by the tour guide at the end of the tour.";
 	private static final String TRANSPORTATION = "A tour bus";
@@ -126,17 +127,19 @@ public class KitchenSinkController {
 	private static final String INSURANCE = "Insurance is covered. Each customers are protected by the Excellent Blue-Diamond Scheme by AAA insurance company.";
 	private static final String HOTEL_BED = "All rooms are twin beds. Every customer needs to share a room with another customer. If a customer prefer to own a room by himself/herself, additional charge of 30% will be applied.";
 	private static final String VISA = "Please refer the Visa issue to the immigration department of China. The tour are assembled and dismissed in mainland and no cross-border is needed. However, you will need a travelling document when you check in the hotel.";
-	private static final String SWIMMING_SUIT = "Yes you do need it. Otherwise you may not use the facility.";
+	private static final String SWIMMING_SUIT = "You need swimming suit in a water theme park or a hot spring resort. Otherwise you may not use the facility.";
 	private static final String VEGETARIAN = "Sorry, we don't serve vegetarian.";
 	private static final String CHILDREN_TOUR_FEE = "Age below 3 (including 3) is free. Age between 4 to 11 (including 4 and 11) has a discount of 20% off. Otherwise full fee applies. The same service charge is applied to all age customers.";
 	private static final String LATE = "You shall contact the tour guide if you know you will be late and see if the tour guide can wait a little bit longer. No refund or make up shall be made if a customer is late for the tour.";
 	
 	private static final String NOT_FOUND = "Sorry I don't understand what you are saying.";
 	
-	private Customer customer = new Customer();
-	private int status = -2;
-	private InProgressBooking booking = new InProgressBooking();
-	private ArrayList<Tour> tourArrTemp = new ArrayList<Tour>();
+	private static ArrayList<Customer> customerList = new ArrayList<Customer>();
+	private Customer customer;
+	private int status = -100;
+	private InProgressBooking booking;
+	private ArrayList<Tour> tourArrTemp;
+	
 	//arraylist of confirmed booking
 
 /*	private boolean searchingTour = false;
@@ -156,7 +159,7 @@ public class KitchenSinkController {
 	
 	private ConfirmedBooking confirmedBooking = null;
 	
-	private Customer customer = new Customer(); ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	private Customer customer = new Customer();
 	
 	private boolean firstTimeEnterBookingTour = false;
 */	
@@ -283,8 +286,29 @@ public class KitchenSinkController {
 
 		//Get and set the Line ID of the user
 		String lineID = event.getSource().getUserId();
-		customer.setLineID(lineID);
+		
+		if (customerList.size() != 0) {
+			for(int i = 0; i < customerList.size(); i++) {
+				if (lineID.equals(customerList.get(i).getLineID())) {
+					customer = customerList.get(i);
+					status = customer.getStatus();
+					booking = customer.getBooking();
+					tourArrTemp = customer.getTourArr();
+					break;
+				}
+				else status = -100;
+			}
+		}
 
+		if (status == -100) {
+			customer = new Customer();
+			status = customer.getStatus();
+			booking = customer.getBooking();
+			tourArrTemp = customer.getTourArr();
+			customer.setLineID(lineID);
+			customerList.add(customer);
+		}
+		
 		//Get customer's data if the user exists in the database
 		if (customer.getCustomerID() == null) {
 			database.checkExistingCustomer(lineID, customer);
@@ -318,14 +342,15 @@ public class KitchenSinkController {
 		}
 
 		switch (status) {
-			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); status = -2; break;	//Greeting
-			case 1: this.reply(replyToken, searchForFAQ(text.toLowerCase(), tokens, tags)); break; //Search FAQ
+			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); customer.setStatus(-2); break;	//Greeting
+			case 1: this.reply(replyToken, searchForFAQ(text, tokens, tags)); break; //Search FAQ
 			case 2: this.reply(replyToken, searchTour(text, tokens, tags)); break; //Search tour
 			case 3: this.reply(replyToken, bookingProcess(text.toLowerCase())); break; //Book tour
-			case 4: break; //Search previous record
+			case 4: this.reply(replyToken, searchPreviousRecord()); break; //Search previous record
 			case 5: this.reply(replyToken, createCustomer(text)); break; //Create customer
-			case -1: this.replyText(replyToken, "Thank you for using our service. Bye!"); status = -2; break; //Exit
-			default: this.replyText(replyToken, NOT_FOUND); break; //Exit
+			case -1: this.replyText(replyToken, "Thank you for using our service. Bye!"); customer.setStatus(-2); break; //Exit
+			case -2: this.replyText(replyToken, NOT_FOUND); break; //Error message
+			default: break;
 		}
 	}
 	/*************************************************************************************************************************************************************/
@@ -337,19 +362,24 @@ public class KitchenSinkController {
 		String[] exit = {"bye", "byebye", "goodbye", "thanks", "see you",  "thank you"};
 		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "would", "is", "are", "was", "were"};
 		String[] faqSpecialCase = {"visa", "pass", "passport"};
-		String[] questionVerb = {"ask", "know", "join", "book", "search"};
+		String[] questionVerb = {"ask", "know", "join", "book", "search", "find", "choose"}; //go?
+		String[] noRespond = {"yes", "ok"};
+		String[] tempVB = {"help"};
 
 		booking.clearAllData();
+		customer.setBooking(booking);
 		
 		//remove elements of the temporary TourArr
 		for(int i = 0; i < tourArrTemp.size(); i++) {
-			tourArrTemp.remove(i);
+			tourArrTemp.remove(i);	
 		}
+		customer.setTourArr(tourArrTemp);
 
 		//check whether it is a greeting
 		for(int i = 0; i < greeting.length - 1; i++) {
 			if (greeting[i].equals(tokens[0]) || text.contains(greeting[4])) {
-				status = 0; 
+				status = 0;
+				customer.setStatus(status); 
 				return;
 			}
 		}
@@ -360,33 +390,47 @@ public class KitchenSinkController {
 				for(int j = 0; j < tokens.length - 1; j++) {
 					if ((tokens[j]+" "+tokens[j+1]).contains(exit[i])) {
 						status = -1;
+						customer.setStatus(status);
 						return;
 					}
 				}
 			}
-			else if (exit[i].equals(tokens[0])) {
+			else if (exit[i].equals(tokens[0]) || tokens[0].equals("no")) {
 				status = -1;
+				customer.setStatus(status);
 				return;
 			}
 		}
 
+		//no response needed
+		for(int i = 0; i < noRespond.length; i++) {
+			if(noRespond[i].equals(tokens[0])) {
+				status = -3;
+				customer.setStatus(status);
+				return;
+			}
+		}
+
+		//search booking record
 		for(int i = 0; i < tokens.length; i++) {
-			if (tokens[i].equals("booking") && (tokens[i+1].contains("record") || (tokens[i+1].contains("histor")))) {
+			if ((tokens[i].equals("booking") || tokens[i].equals("previous")) && (tokens[i+1].contains("record") || (tokens[i+1].contains("histor")))) {
 				status = 4;
+				customer.setStatus(status);
 				return;
 			}
 		}
 
-		//check whether the user wants to book tour / search tour / search FAQ
-		for(int i = 0; i < tags.length; i++) {
+		//check whether the user wants to search tour / book tour
+		for(int i = 0; i < tokens.length; i++) {
 			for(int j = 0; j < questionVerb.length; j++) {
-				if ((tags[i].equals("VB") || tags[i].equals("NN") || tags[i].equals("NNP")) && tokens[i].equals(questionVerb[j])) {
+				if (text.contains("tour") && tokens[i].equals(questionVerb[j])) {
 					status = 2;
+					customer.setStatus(status);
 					return;
 				}
 			}
 		}
-		
+
 		//check whether the user wants to search FAQ	
 		for(int i = 0; i < questionWord.length; i++) {
 			if (tokens[0].equals(questionWord[i])) {
@@ -402,12 +446,13 @@ public class KitchenSinkController {
 				return;
 			}
 		}
+		
 
 
 	}
 
 	/*************************************************************************************************************************************************************/
-	/*******************************************************************FAQ***************************************************************************************/
+	/****************************************************************Search FAQ***********************************************************************************/
 	/*************************************************************************************************************************************************************/
 	private ArrayList<Message> searchForFAQ(String text, String[] tokens, String[] tags) throws Exception {
 		ArrayList<Message> messages = new ArrayList<Message>();
@@ -650,11 +695,11 @@ public class KitchenSinkController {
 				}
 			}
 		}
-		status = -1;
+		status = -2;
 		messages.add(new TextMessage(NOT_FOUND));
 		return messages;
 	}
-	
+
 	/*************************************************************************************************************************************************************/
 	/****************************************************************SearchTour***********************************************************************************/
 	/*************************************************************************************************************************************************************/
@@ -663,10 +708,15 @@ public class KitchenSinkController {
 
 		String adj = "tour";
 		String verb = null;
+		String time = null;
+		String place = null;
+		String hotel = null;
 		int tourNo = -1;
+		String[] number = {"one", "two", "three", "four", "five"};
+		String[] month = {"january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"};
 
 		if (booking.getTour() == null && tokens[0].equals("quit")) {
-			status = -2;
+			customer.setStatus(-2);
 			TextMessage message = new TextMessage("How can I help you?");
 			messages.add(message);
 			return messages;
@@ -674,9 +724,13 @@ public class KitchenSinkController {
 
 		//search for adjectives decribing the tour
 		for(int i = 0; i < tokens.length; i++) {
+			if (tags[i].equals("VB")) {
+				verb = tokens[i];
+			}
+
 			if (tokens[i].contains("tour")) {
 				for(int j = i - 1; j >= 0; j--) {
-					if ((tags[j].equals("NN") || tags[j].equals("NNP") || tags[j].equals("JJ") || tags[j].equals("VBG")) && !tokens[j].equals("book")) {
+					if ((tags[j].equals("NN") || tags[j].equals("NNP") || tags[j].equals("JJ") || tags[j].equals("VBG")) && !tokens[j].equals(verb)) { ///////not equal questionVB
 						adj = tokens[j] + " " + adj;
 					}
 					else break;
@@ -685,19 +739,30 @@ public class KitchenSinkController {
 		}
 
 		for(int i = 0; i < tags.length; i++) {
-			if (tags[i].equals("LS") || tags[i].equals("CD"))	
-				tourNo = Integer.parseInt(tokens[i]);
+			if (tags[i].equals("LS") || tags[i].equals("CD")){
+				try {
+					tourNo = Integer.parseInt(tokens[i]);
+				} catch (NumberFormatException e) {
+					for(int j = 0; j < number.length; j++) {
+						if (tokens[i].equals(number[j])) {
+							tourNo = j + 1;
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		if (adj.length() > 4 && tourNo == -1 && booking.getTour() == null) {
 			tourArrTemp = database.searchTour(adj.substring(0,adj.length()-5));
+			customer.setTourArr(tourArrTemp);
 			if (tourArrTemp.size() == 0) {
 				TextMessage message = new TextMessage("Sorry we currently do not provide such tour. Please search for other tours.");
-				messages.add(message); //do you need recommendation?
+				messages.add(message); //do you need recommendation????????????????????????????????????????????
 				return messages;
 			}
 
-			TextMessage totalNo = new TextMessage("Yes. We have " + tourArrTemp.size() + " similar tours.");
+			TextMessage totalNo = new TextMessage("Yes. We have " + tourArrTemp.size() + " similar tours.\nPlease enter the number to view the tour details.");
 			messages.add(totalNo);
 			if(tourArrTemp.size() >= 5){
 				TextMessage message = new TextMessage("Sorry Free Version Line chatbot cannot reply more than 5 messages. Please be more specific.");
@@ -712,7 +777,7 @@ public class KitchenSinkController {
 			return messages;
 		}
 		else if (text.contains("tour") && adj.equals("tour") && booking.getTour() == null) {
-			TextMessage message = new TextMessage("What kind of tours would you like to book?"); //book --> verb//////////////////////////////////////////
+			TextMessage message = new TextMessage("What kind of tours would you like to " + verb +"?"); //go to recommendation function??????????
 			messages.add(message);
 			return messages;
 		}
@@ -723,6 +788,8 @@ public class KitchenSinkController {
 			messages.add(message1);
 
 			DateFormat df = new SimpleDateFormat("d/MM");
+			DecimalFormat priceFormat = new DecimalFormat("#0.#");
+
 			//get all confirmed date	
 			String confirmedDateString = "";
 			ArrayList<Date> confirmedDate = tour.getConfirmedDate();
@@ -746,20 +813,26 @@ public class KitchenSinkController {
 					availableDateString = df.format(availableDate.get(i)) + ", " + availableDateString;
 			}
 			if (availableDate.size() == 0) {
-				status = -2;
 				booking.clearAllData();
+				customer.setBooking(booking);
 				TextMessage message6 = new TextMessage("All tours of " + tour.getTourID() + " are full. Maybe you can search for another tour.");
 				messages.add(message6);
-
 			}
 			else {
 				TextMessage message3 = new TextMessage("We have tour on " + availableDateString + " still accept application");
-				TextMessage message4 = new TextMessage("Fee: Weekday " + tour.getWeekdayPrice() + " / Weekend " + tour.getWeekendPrice());
+				TextMessage message4;
+				if (tour.getWeekdayPrice() != tour.getWeekendPrice()) {
+					message4 = new TextMessage("Fee: Weekday $" + priceFormat.format(tour.getWeekdayPrice()) + " / Weekend $" + priceFormat.format(tour.getWeekendPrice()));
+				}
+				else {
+					message4 = new TextMessage("Fee: $" + priceFormat.format(tour.getWeekdayPrice()));
+				}				
 				TextMessage message5 = new TextMessage("Do you want to book this one? (Yes/No)");
 				messages.add(message3);
 				messages.add(message4);
 				messages.add(message5);
 				booking.setTour(tour);
+				customer.setBooking(booking);
 			}
 
 			return messages;
@@ -771,7 +844,7 @@ public class KitchenSinkController {
 				messages.add(message);
 
 				if (customer.getCustomerID() == null) {
-					status = 5;
+					customer.setStatus(5);
 					TextMessage message1 = new TextMessage("You have not booked any tours before. Please enter your personal information.");
 					TextMessage message2 = new TextMessage("What is your name?");
 					messages.add(message1);
@@ -779,7 +852,7 @@ public class KitchenSinkController {
 					return messages;
 				}
 				else{
-					status = 3;
+					customer.setStatus(3);
 					TextMessage message1 = new TextMessage("Which date you are going?");
 					messages.add(message1);
 					return messages;
@@ -787,13 +860,14 @@ public class KitchenSinkController {
 			}
 			else if (tokens[0].equals("no")) {
 				booking.clearAllData();
+				customer.setBooking(booking);
 				TextMessage message = new TextMessage("You can choose other tours from the above list or search for another tour.\nType 'quit' if you don't want to search tours.");
 				messages.add(message);
 				return messages;
 			}
 		}
 
-		TextMessage message = new TextMessage("Sorry I don't understand. Please re-enter your choice.");
+		TextMessage message = new TextMessage("Sorry I don't understand. Please re-enter.");
 		messages.add(message);
 		return messages;
 	}
@@ -802,7 +876,6 @@ public class KitchenSinkController {
 	/****************************************************************Booking Process******************************************************************************/
 	/*************************************************************************************************************************************************************/
 	private ArrayList<Message> bookingProcess(String text) throws Exception {
-//		boolean success = false;
 		Tour tour = booking.getTour();
 		String lineID = booking.getLineID();
 		Date chosenDate = booking.getDate();
@@ -814,10 +887,12 @@ public class KitchenSinkController {
 		String request = booking.getSpecialRequest();
 		ArrayList<Message> messages = new ArrayList<Message>();
 		DateFormat df = new SimpleDateFormat("d/MM");
+		DecimalFormat priceFormat = new DecimalFormat("#0.#");
 
 		if (text.equals("no")) {
-			status = -2;
+			customer.setStatus(-2);
 			booking.clearAllData();
+			customer.setBooking(booking);
 			TextMessage message1 = new TextMessage("You have abandoned this booking process.");
 			TextMessage message2 = new TextMessage("What other help do you need?");
 			messages.add(message1);
@@ -828,33 +903,41 @@ public class KitchenSinkController {
 			java.sql.Date sqlDate = new java.sql.Date(chosenDate.getTime());
 			boolean success = database.bookTour(lineID, tour.getTourID(), sqlDate, adult, children, toddler, 0, totalFee, request);
 			TextMessage message1;
+			TextMessage message2;
 			if (success) {
 				message1 = new TextMessage("The booking process is done. Thank you for booking " + tour.getName() + "!");
+				message2 = new TextMessage(CONFIRMED_BOOKING_PAYMENT);
 			}
 			else {
-				message1 = new TextMessage("Some errors occur during the booking process. Please contact our customer service for help.");
+				message1 = new TextMessage("Some errors occur during the booking process.");
+				message2 = new TextMessage("Please contact our customer service for help.");
 			}
 			
-			TextMessage message2 = new TextMessage("What other help do you need?");
-			status = -2;
+			TextMessage message3 = new TextMessage("What other help do you need?");
+			customer.setStatus(-2);
 			booking.clearAllData();
+			customer.setBooking(booking);
 			messages.add(message1);
 			messages.add(message2);
+			messages.add(message3);
 			return messages;
 		}
 
 		if (lineID == null) {
-			booking.setLineID(customer.getLineID());			
+			booking.setLineID(customer.getLineID());
+			customer.setBooking(booking);			
 		}
 		
 		if (price == -1 && chosenDate != null) {
 			booking.setTourFee();
+			customer.setBooking(booking);
 		}
 
 		if(chosenDate == null) { 		
 			for(int i = 0; i < tour.getAvailableDate().size(); i++) {
 				if (text.equals(df.format(tour.getAvailableDate().get(i)))) {
 					booking.setDate(tour.getAvailableDate().get(i));
+					customer.setBooking(booking);
 					TextMessage message = new TextMessage("How many adults?");
 					messages.add(message);
 					return messages;
@@ -865,39 +948,42 @@ public class KitchenSinkController {
 			messages.add(message);
 			return messages;
 		}
-		else if (adult == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity())) {
+		else if (adult == -1 && (Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity())) {
 			booking.setNoOfAdults(Integer.parseInt(text));
+			customer.setBooking(booking);
 			TextMessage message = new TextMessage("How many children (Age 4-11)?");
 			messages.add(message);
 			return messages;
 		}
-		else if (adult == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity())) {
+		else if (adult == -1 && !(Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity())) {
 			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()) + " vacancy.");
 			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of adults. Otherwise, type 'no'.)");
 			messages.add(message1);
 			messages.add(message2);
 			return messages;
 		}
-		else if (children == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult)) {
+		else if (children == -1 && (Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity() - adult)) {
 			booking.setNoOfChildren(Integer.parseInt(text));
+			customer.setBooking(booking);
 			TextMessage message = new TextMessage("How many toddler (Age 0-3)?");
 			messages.add(message);
 			return messages;
 		}
-		else if (children == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult)) {
+		else if (children == -1 && !(Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity() - adult)) {
 			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()-adult) + " vacancy.");
 			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of children. Otherwise, type 'no'.)");
 			messages.add(message1);
 			messages.add(message2);
 			return messages;
 		}
-		else if (toddler == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult + children)) {
+		else if (toddler == -1 && (Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity() - adult - children)) {
 			booking.setNoOfToddler(Integer.parseInt(text));
+			customer.setBooking(booking);
 			TextMessage message = new TextMessage("Do you have any special request? (If yes, please enter your request. Otherwise, type 'NULL')");
 			messages.add(message);
 			return messages;
 		}
-		else if (toddler == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult + children)) {
+		else if (toddler == -1 && !(Integer.parseInt(text) >= 0 && Integer.parseInt(text) <= tour.getCapacity() - adult - children)) {
 			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()-adult-children) + " vacancy.");
 			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of toddler. Otherwise, type 'no'.)");
 			messages.add(message1);
@@ -911,12 +997,13 @@ public class KitchenSinkController {
 			double adultTotalFee = price * adult;
 			double childrenTotalFee = price * 0.8 * children;
 			booking.setTotalFee(adultTotalFee + childrenTotalFee + serviceCharge);
+			customer.setBooking(booking);
 			String line1 = tour.getTourID() + " " + tour.getName() + " " + df.format(chosenDate);
-			String line2 = "\nNo. of adults: " + String.valueOf(adult) + " * " + String.valueOf(price) + " = $" + String.valueOf(adultTotalFee);
-			String line3 = "\nNo. of children: " + String.valueOf(children) + " * " + String.valueOf(price*0.8) + " = $" + String.valueOf(childrenTotalFee);
+			String line2 = "\nNo. of adults: " + String.valueOf(adult) + " * $" + priceFormat.format(price) + " = $" + priceFormat.format(adultTotalFee);
+			String line3 = "\nNo. of children: " + String.valueOf(children) + " * $" + priceFormat.format(price*0.8) + " = $" + priceFormat.format(childrenTotalFee);
 			String line4 = "\nNo. of toddler: " + String.valueOf(toddler) + " (free of charge)";
-			String line5 = "\nService Charge: $60 * " + String.valueOf(totalNoOfPeople) + " people * " + String.valueOf(tour.getDays()) + " days = $" + String.valueOf(serviceCharge);
-			String line6 = "\nTotal fee: " + String.valueOf(adultTotalFee + childrenTotalFee + serviceCharge);
+			String line5 = "\nService Charge: $60 * " + String.valueOf(totalNoOfPeople) + " people * " + String.valueOf(tour.getDays()) + " days = $" + priceFormat.format(serviceCharge);
+			String line6 = "\nTotal fee: $" + priceFormat.format(adultTotalFee + childrenTotalFee + serviceCharge);
 			String line7 = "\n\nSpecial request: " + booking.getSpecialRequest();
 			TextMessage message1 = new TextMessage(line1 + line2 + line3 + line4 + line5 + line6 + line7);
 			TextMessage message2 = new TextMessage("Do you wish to confirm this booking? (If yes, please enter 'confirmed'. Otherwise, enter 'no'.)");
@@ -928,23 +1015,6 @@ public class KitchenSinkController {
 		TextMessage message = new TextMessage("Sorry I don't understand. Please re-enter.");
 		messages.add(message);
 		return messages;
-/*
-		if(success) {
-			status = -2;
-			booking.setTour(null);
-			TextMessage message = new TextMessage(CONFIRMED_BOOKING);
-			messages.add(message);
-			return messages;
-		}
-		else {
-			status = -2;
-			booking.setTour(null);
-			TextMessage message = new TextMessage("booking not successful"); 			/////////////////////////////////////////////not successful case
-			messages.add(message);
-			return messages;
-		}
-*/		//totalFee = price * noOfAdults + price * noOfChildren * 0.8 + (noOfAdults + noOfChildren + noOfToodler) * 60;
-
 	}
 
 	/*************************************************************************************************************************************************************/
@@ -988,7 +1058,7 @@ public class KitchenSinkController {
 		}
 
 		if(success) {
-			status = 3;
+			customer.setStatus(3);
 			TextMessage message1 = new TextMessage("You have successfully create your account.");
 			TextMessage message2 = new TextMessage("Which date you are going?");
 			messages.add(message1);
@@ -996,7 +1066,7 @@ public class KitchenSinkController {
 			return messages;
 		}
 		else {
-			status = -2;
+			customer.setStatus(-2);
 			booking.clearAllData();
 			TextMessage message1 = new TextMessage("You fail to create the account. Please contact our customer service for help.");
 			TextMessage message2 = new TextMessage("What other help do you need?");///////////////////////////////////////////////////////
@@ -1005,6 +1075,46 @@ public class KitchenSinkController {
 			return messages;
 		}
 	}
+
+	/*************************************************************************************************************************************************************/
+	/***************************************************************Previous Record*******************************************************************************/
+	/*************************************************************************************************************************************************************/
+	private ArrayList<Message> searchPreviousRecord() throws Exception {
+		ArrayList<Message> messages = new ArrayList<Message>();
+		ArrayList<String[]> recordArr = database.searchBookingRecord(customer.getLineID());
+
+		if (recordArr.size() == 0) {
+			customer.setStatus(-2);
+			TextMessage message = new TextMessage("You do not have any booking record.");
+			messages.add(message);
+			return messages;
+		}
+
+		TextMessage message1 = new TextMessage("You have " + recordArr.size() + " booking record(s)."); ///////////////////////////////////////more than four???
+		messages.add(message1);
+		if (recordArr.size() <= 4) {
+			for(int i = 0; i < recordArr.size(); i++) {
+				String[] temp = recordArr.get(i);
+				String line1 = String.valueOf(i+1) + ". Tour: (" + temp[0] + ") " + temp[1] + " - " + temp[2];
+				String line2 = "\n Number of adults: " + temp[3];
+				String line3 = "\n Number of children: " + temp[4];
+				String line4 = "\n Number of toddler: " + temp[5];
+				String line5 = "\n Total fee: " + temp[6];
+				String line6 = "\n Amount paid: " + temp[7];
+				String line7 = "\n Special request: " + temp[8];
+				TextMessage message2 = new TextMessage(line1 + line2 + line3 + line4 + line5 + line6 + line7);
+				messages.add(message2);
+			}
+		}
+
+		customer.setStatus(-2);
+		return messages;
+	}
+
+
+
+
+
 
 
 	static String createUri(String path) {

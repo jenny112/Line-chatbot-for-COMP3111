@@ -119,29 +119,4 @@ public class InProgressBooking {
 		this.specialRequest = null;
 	}
 
-
-/*
-	public boolean checkValidDate(Date d) {
-		return true;
-	}
-	
-	public char allDataCollected() {
-		if(date==null)
-			return 'd';
-		if(noOfAdults==-1)
-			return 'a';
-		if(noOfToodler==-1)
-			return 't';
-		if(noOfChildren==-1)
-			return 'c';
-		if(totalFee==-1.0)
-			return 'f';
-		return 'e';
-	}
-
-*/
-
-
-	
-
 }
