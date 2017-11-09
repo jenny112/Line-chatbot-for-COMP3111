@@ -16,18 +16,33 @@
 
 package com.example.bot.spring;
 
+<<<<<<< Updated upstream
 import java.util.ArrayList;
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+=======
+
+import java.io.StringWriter;
+import java.io.IOException;
+import java.io.InputStream;
+>>>>>>> Stashed changes
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -98,18 +113,71 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
+<<<<<<< Updated upstream
 	private static final int MAX_SEARCHED_TOURS = 10;
 	private static final int MAX_BOOKING_TOURS = 10;
 	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
 	private boolean searchingTour = false;
+=======
+
+/*	private static final int MAX_SEARCHED_TOURS = 15;
+	private static final int MAX_BOOKING_TOURS = 15;
+	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
+	private static final String CONFIRMED_BOOKING = "Thank you. Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
+	private static final String NO_TOUR_RETURNED_FROM_DB = "Sorry, there is no matching tours.";
+*/	
+
+	private static final String CONFIRMED_BOOKING = "Thank you. Please pay the tour fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. When you complete the ATM payment, please send the bank in slip to us. Our staff will validate it.";
+
+	//FAQ answers
+	private static final String HOW_TO_APPLY = "Customers shall approach the company by phone or visit our store (in Clearwater bay) with the choosen tour code and departure date. If it is not full, customers will be advised by the staff to pay the tour fee. Tour fee is non refundable. Customer can pay their fee by ATM to 123-345-432-211 of ABC Bank or by cash in our store. Customer shall send their pay-in slip to us by email or LINE.";
+	private static final String GATHERING_POINT = "We gather at the gathering spot \"Exit A, Futian port, Shenzhen\" at 8:00AM on the departure date. We dismiss at the same spot after the tour. ";
+	private static final String CANCELLED_TOUR = "In case a tour has not enough people or bad weather condition and the tour is forced to cancel, customers will be informed 3 days in advanced. Either change to another tour or refund is avaliable for customers to select. However, due to other reasons such as customers' personal problem no refund can be made.";
+	private static final String ADDITIONAL_CHARGE = "Each customer need to pay an additional service charge at the rate $60/day/person, on top of the tour fee. It is collected by the tour guide at the end of the tour.";
+	private static final String TRANSPORTATION = "A tour bus";
+	private static final String TOUR_GUIDE_CONTACT = "Each tour guide has a LINE account and he will add the customers as his friends before the departure date. You can contact him/her accordingly.";
+	private static final String INSURANCE = "Insurance is covered. Each customers are protected by the Excellent Blue-Diamond Scheme by AAA insurance company.";
+	private static final String HOTEL_BED = "All rooms are twin beds. Every customer needs to share a room with another customer. If a customer prefer to own a room by himself/herself, additional charge of 30% will be applied.";
+	private static final String VISA = "Please refer the Visa issue to the immigration department of China. The tour are assembled and dismissed in mainland and no cross-border is needed. However, you will need a travelling document when you check in the hotel.";
+	private static final String SWIMMING_SUIT = "Yes you do need it. Otherwise you may not use the facility.";
+	private static final String VEGETERIAN = "Sorry, we don't serve vegeterian.";
+	private static final String CHILDREN_TOUR_FEE = "Age below 3 (including 3) is free. Age between 4 to 11 (including 4 and 11) has a discount of 20% off. Otherwise full fee applies. The same service charge is applied to all age customers.";
+	private static final String LATE = "You shall contact the tour guide if you know you will be late and see if the tour guide can wait a little bit longer. No refund or make up shall be made if a customer is late for the tour.";
+	
+	
+	private Customer customer = new Customer();
+	private int status = -2;
+	private InProgressBooking booking = new InProgressBooking();
+	private ArrayList<Tour> tourArrTemp = new ArrayList<Tour>();
+	//arraylist of confirmed booking
+
+/*	private boolean searchingTour = false;
+>>>>>>> Stashed changes
 	private Tour[] searchedTours = new Tour[MAX_SEARCHED_TOURS];
 	private int noOfSearchedTours = 0;
 	
 	private boolean bookingTour = false;
 	private Tour[] bookingTours = new Tour[MAX_BOOKING_TOURS];
 	private int noOfBookingTours = 0;
+<<<<<<< Updated upstream
 	
 	
+=======
+	
+	private boolean confirmingTour = false;
+	private InProgressBooking inProgressBooking = null;
+
+	private static String userID;
+	
+	boolean date = false;
+	
+	private ConfirmedBooking confirmedBooking = null;
+	
+	private Customer customer = new Customer(); ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private boolean firstTimeEnterBookingTour = false;
+*/	
+>>>>>>> Stashed changes
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
@@ -131,7 +199,7 @@ public class KitchenSinkController {
 	public void handleLocationMessageEvent(MessageEvent<LocationMessageContent> event) {
 		LocationMessageContent locationMessage = event.getMessage();
 		reply(event.getReplyToken(), new LocationMessage(locationMessage.getTitle(), locationMessage.getAddress(),
-				locationMessage.getLatitude(), locationMessage.getLongitude()));
+			locationMessage.getLatitude(), locationMessage.getLongitude()));
 	}
 
 	@EventMapping
@@ -227,25 +295,34 @@ public class KitchenSinkController {
 		reply(replyToken, new StickerMessage(content.getPackageId(), content.getStickerId()));
 	}
 
-	private void handleTextContent(String replyToken, Event event, TextMessageContent content)
-            throws Exception {
-		// Get User Input
-        String text = content.getText();
-        
-        //Load Tokenizer model
-        InputStream tokenis = this.getClass().getResourceAsStream("/static/en-token.bin");
-        TokenizerModel modelToken = new TokenizerModel(tokenis);
-        
+	private void handleTextContent(String replyToken, Event event, TextMessageContent content) throws Exception {
+		//Get user input
+		String text = content.getText();
+
+		//Get and set the Line ID of the user
+		String lineID = event.getSource().getUserId();
+		customer.setLineID(lineID);
+
+		//Get customer's data if the user exists in the database
+		if (customer.getCustomerID() == null) {
+			database.checkExistingCustomer(lineID, customer);
+		}
+
+		//Load Tokenizer model
+		InputStream tokenis = this.getClass().getResourceAsStream("/static/en-token.bin");
+		TokenizerModel modelToken = new TokenizerModel(tokenis);
+
         //Load POS tagging model
-        InputStream taggeris = this.getClass().getResourceAsStream("/static/en-pos-maxent.bin");
-        POSModel modelPOS = new POSModel(taggeris);
-        POSTaggerME tagger = new POSTaggerME(modelPOS);
-        
+		InputStream taggeris = this.getClass().getResourceAsStream("/static/en-pos-maxent.bin");
+		POSModel modelPOS = new POSModel(taggeris);
+		POSTaggerME tagger = new POSTaggerME(modelPOS);
+
         //Tokenize the sentence
-        Tokenizer tokenizer = new TokenizerME(modelToken);
-        String[] tokens = tokenizer.tokenize(text);
-        
+		Tokenizer tokenizer = new TokenizerME(modelToken);
+		String[] tokens = tokenizer.tokenize(text);
+
         //Generate tags[]
+<<<<<<< Updated upstream
         String tags[] = tagger.tag(tokens);
         
         log.info("Got text message from {}: {}", replyToken, text);
@@ -337,45 +414,288 @@ public class KitchenSinkController {
 				if (tags[i].equals("PRP$") || tags[i].equals("UH")) {
 					if (greetingString.contains(tokens[i].toLowerCase())) {
 						greeting = true;
+=======
+		String tags[] = tagger.tag(tokens);
+
+		//convert the input message to lower case
+		for(int i = 0; i < tokens.length; i++) {
+			tokens[i] = tokens[i].toLowerCase();
+			log.info("show tag: {}", tags[i]);/////////////////////////////////////////////////////////////////////////////////////////////////debug used
+		}
+
+		//Identify keyword
+		if (status < 1) {
+			keywordClassification(text.toLowerCase(), tokens, tags);
+		}
+
+		switch (status) {
+			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); status = -2; break;	//Greeting
+			case 1: break; //Search FAQ
+			case 2: this.reply(replyToken, searchTour(text, tokens, tags)); break; //Search tour
+			case 3: this.reply(replyToken, bookingProcess(text.toLowerCase())); break; //Book tour
+			case 4: this.reply(replyToken, searchPreviousRecord()); break; //Search previous record
+			case 5: this.reply(replyToken, createCustomer(text)); break; //Create customer
+			case -1: this.replyText(replyToken, "Thank you for using our service. Bye!"); status = -2; break; //Exit
+			default: this.replyText(replyToken, "Sorry I don't understand what you are saying"); break; //Exit
+		}
+	}
+	/*************************************************************************************************************************************************************/
+	/****************************************************************keywordClassification************************************************************************/
+	/*************************************************************************************************************************************************************/
+	private void keywordClassification(String text, String[] tokens, String[] tags){
+
+		String[] greeting = {"hi", "hello", "hey", "yo", "is anyone there"};
+		String[] exit = {"bye", "byebye", "goodbye", "thanks", "see you",  "thank you"};
+		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "is", "are", "was", "were"};
+		String[] questionVerb = {"ask", "know", "join", "book", "search"};
+
+		booking.clearAllData();
+		
+		//remove elements of the temporary TourArr
+		for(int i = 0; i < tourArrTemp.size(); i++) {
+			tourArrTemp.remove(i);
+		}
+
+		//check whether it is a greeting
+		for(int i = 0; i < greeting.length - 1; i++) {
+			if (greeting[i].equals(tokens[0]) || text.contains(greeting[4])) {
+				status = 0; 
+				return;
+			}
+		}
+
+		//check whether the user wants to end the conversation
+		for(int i = 0; i < exit.length; i++) {
+			if (tokens.length > 1) {
+				for(int j = 0; j < tokens.length - 1; j++) {
+					if ((tokens[j]+" "+tokens[j+1]).contains(exit[i])) {
+						status = -1;
+						return;
+>>>>>>> Stashed changes
 					}
+				}
+			}
+			else if (exit[i].equals(tokens[0])) {
+				status = -1;
+				return;
+			}
+		}
+
+		for(int i = 0; i < tokens.length; i++) {
+			if (tokens[i].equals("booking") && (tokens[i+1].contains("record") || (tokens[i+1].contains("histor")))) {
+				status = 4;
+				return;
+			}
+		}
+
+		//check whether the user wants to book tour / search tour / search FAQ
+		for(int i = 0; i < tags.length; i++) {
+			for(int j = 0; j < questionVerb.length; j++) {
+				if ((tags[i].equals("VB") || tags[i].equals("NN") || tags[i].equals("NNP")) && tokens[i].equals(questionVerb[j])) {
+					status = 2;
+					return;
 				}
 			}
 
-			//for questions
-			if (!question) {
-				if (tags[i].equals("VB")) {
-					if (questionVerbs.contains(tokens[i].toLowerCase())) {
-						question = true;
-						continue;
-					}
-				} else if (tags[i].equals("WP")) {
-					if (questionWords.contains(tokens[i].toLowerCase())) {
-						question = true;
-						continue;
-					}
-				}
-			}
-			if (question) {
-				//for display tour
-				if (tags[i].equals("NN") || tags[i].equals("NNS")) {
-					if (tokens[i].contains("tour")) {
-						tour = true;
-						//Search backwards for adj describing the tour
-						//e.g. "hot spring tour" <-- search for "hot spring"
-						for (int j = i - 1; j > -1; j--) {
-							if (tags[j].equals("NN") || tags[j].equals("JJ")) {
-								adj = tokens[j] + " " + adj;
-							} else {
-								break;
-							}
-						}
-						break;
-					}
-				}
-			}
 
 		}
+
+
+	}
+
+	/*************************************************************************************************************************************************************/
+	/****************************************************************SearchTour***********************************************************************************/
+	/*************************************************************************************************************************************************************/
+	private ArrayList<Message> searchTour(String text, String[] tokens, String[] tags) throws Exception {
+		ArrayList<Message> messages = new ArrayList<Message>();
+
+		String adj = "tour";
+		String verb = null;
+		int tourNo = -1;
+
+		if (booking.getTour() == null && tokens[0].equals("quit")) {
+			status = -2;
+			TextMessage message = new TextMessage("How can I help you?");
+			messages.add(message);
+			return messages;
+		}
+
+		//search for adjectives decribing the tour
+		for(int i = 0; i < tokens.length; i++) {
+			if (tokens[i].contains("tour")) {
+				for(int j = i - 1; j >= 0; j--) {
+					if ((tags[j].equals("NN") || tags[j].equals("NNP") || tags[j].equals("JJ") || tags[j].equals("VBG")) && !tokens[j].equals("book")) {
+						adj = tokens[j] + " " + adj;
+					}
+					else break;
+				}
+			}
+		}
+
+		for(int i = 0; i < tags.length; i++) {
+			if (tags[i].equals("LS") || tags[i].equals("CD"))	
+				tourNo = Integer.parseInt(tokens[i]);
+		}
+
+		if (adj.length() > 4 && tourNo == -1 && booking.getTour() == null) {
+			tourArrTemp = database.searchTour(adj.substring(0,adj.length()-5));
+			if (tourArrTemp.size() == 0) {
+				TextMessage message = new TextMessage("Sorry we currently do not provide such tour. Please search for other tours.");
+				messages.add(message); //do you need recommendation?
+				return messages;
+			}
+
+			TextMessage totalNo = new TextMessage("Yes. We have " + tourArrTemp.size() + " similar tours.");
+			messages.add(totalNo);
+			if(tourArrTemp.size() >= 5){
+				TextMessage message = new TextMessage("Sorry Free Version Line chatbot cannot reply more than 5 messages. Please be more specific.");
+				messages.add(message);
+				return messages;
+			}
+
+			for(int i = 0; i < tourArrTemp.size(); i++) {
+				TextMessage message = new TextMessage(String.valueOf(i+1) + ". " + tourArrTemp.get(i).getTourID() + " " + tourArrTemp.get(i).getName());
+				messages.add(message);
+			}
+			return messages;
+		}
+		else if (text.contains("tour") && adj.equals("tour") && booking.getTour() == null) {
+			TextMessage message = new TextMessage("What kind of tours would you like to book?"); //book --> verb//////////////////////////////////////////
+			messages.add(message);
+			return messages;
+		}
+
+		if(tourNo > 0 && tourNo <= tourArrTemp.size()) {
+			Tour tour = tourArrTemp.get(tourNo-1);
+			TextMessage message1 = new TextMessage(tour.getTourID() + " " + tour.getName() + " * " + tour.getDescription());
+			messages.add(message1);
+
+			DateFormat df = new SimpleDateFormat("d/MM");
+			//get all confirmed date	
+			String confirmedDateString = "";
+			ArrayList<Date> confirmedDate = tour.getConfirmedDate();
+			for(int i = 0; i < confirmedDate.size(); i++) {
+				if (i == confirmedDate.size() - 1) 
+					confirmedDateString = confirmedDateString + df.format(confirmedDate.get(i));
+				else
+					confirmedDateString = df.format(confirmedDate.get(i)) + ", " + confirmedDateString;
+			}
+			if (confirmedDate.size() != 0) {
+				TextMessage message2 = new TextMessage("We have confirmed tour on " + confirmedDateString);
+				messages.add(message2);
+			}
+			//get all available date
+			String availableDateString = "";
+			ArrayList<Date> availableDate = tour.getAvailableDate();
+			for(int i = 0; i < availableDate.size(); i++) {
+				if (i == availableDate.size() - 1)
+					availableDateString = availableDateString + df.format(availableDate.get(i));
+				else
+					availableDateString = df.format(availableDate.get(i)) + ", " + availableDateString;
+			}
+			if (availableDate.size() == 0) {
+				status = -2;
+				booking.clearAllData();
+				TextMessage message6 = new TextMessage("All tours of " + tour.getTourID() + " are full. Maybe you can search for another tour.");
+				messages.add(message6);
+
+			}
+			else {
+				TextMessage message3 = new TextMessage("We have tour on " + availableDateString + " still accept application");
+				TextMessage message4 = new TextMessage("Fee: Weekday " + tour.getWeekdayPrice() + " / Weekend " + tour.getWeekendPrice());
+				TextMessage message5 = new TextMessage("Do you want to book this one? (Yes/No)");
+				messages.add(message3);
+				messages.add(message4);
+				messages.add(message5);
+				booking.setTour(tour);
+			}
+
+			return messages;
+		}
+
+		if(booking.getTour() != null) {
+			if (tokens[0].equals("yes")) {
+				TextMessage message = new TextMessage("Thank you for choosing " + booking.getTour().getTourID() + " " + booking.getTour().getName() + "!");
+				messages.add(message);
+
+				if (customer.getCustomerID() == null) {
+					status = 5;
+					TextMessage message1 = new TextMessage("You have not booked any tours before. Please enter your personal information.");
+					TextMessage message2 = new TextMessage("What is your name?");
+					messages.add(message1);
+					messages.add(message2);
+					return messages;
+				}
+				else{
+					status = 3;
+					TextMessage message1 = new TextMessage("Which date you are going?");
+					messages.add(message1);
+					return messages;
+				}
+			}
+			else if (tokens[0].equals("no")) {
+				booking.clearAllData();
+				TextMessage message = new TextMessage("You can choose other tours from the above list or search for another tour.\nType 'quit' if you don't want to search tours.");
+				messages.add(message);
+				return messages;
+			}
+		}
+
+		TextMessage message = new TextMessage("Sorry I don't understand. Please re-enter your choice.");
+		messages.add(message);
+		return messages;
+	}
+
+	/*************************************************************************************************************************************************************/
+	/****************************************************************Booking Process******************************************************************************/
+	/*************************************************************************************************************************************************************/
+	private ArrayList<Message> bookingProcess(String text) throws Exception {
+//		boolean success = false;
+		Tour tour = booking.getTour();
+		String lineID = booking.getLineID();
+		Date chosenDate = booking.getDate();
+		int adult = booking.getNoOfAdults();
+		int children = booking.getNoOfChildren();
+		int toddler = booking.getNoOfToddler();
+		double price = booking.getTourFee();
+		double totalFee = booking.getTotalFee();
+		String request = booking.getSpecialRequest();
+		ArrayList<Message> messages = new ArrayList<Message>();
+		DateFormat df = new SimpleDateFormat("d/MM");
+
+		if (text.equals("no")) {
+			status = -2;
+			booking.clearAllData();
+			TextMessage message1 = new TextMessage("You have abandoned this booking process.");
+			TextMessage message2 = new TextMessage("What other help do you need?");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+		else if (totalFee != -1 && text.equals("confirmed")) {
+			java.sql.Date sqlDate = new java.sql.Date(chosenDate.getTime());
+			boolean success = database.bookTour(lineID, tour.getTourID(), sqlDate, adult, children, toddler, 0, totalFee, request);
+			TextMessage message1;
+			if (success) {
+				message1 = new TextMessage("The booking process is done. Thank you for booking " + tour.getName() + "!");
+			}
+			else {
+				message1 = new TextMessage("Some errors occur during the booking process. Please contact our customer service for help.");
+			}
+			
+			TextMessage message2 = new TextMessage("What other help do you need?");
+			status = -2;
+			booking.clearAllData();
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+
+		if (lineID == null) {
+			booking.setLineID(customer.getLineID());			
+		}
 		
+<<<<<<< Updated upstream
 		//Return Greeting message if client greets first
 		if (greeting) {
 			return "Hi! How can I help you?";
@@ -421,7 +741,181 @@ public class KitchenSinkController {
 		}
 		message += "\n";
 		return message;
+=======
+		if (price == -1 && chosenDate != null) {
+			booking.setTourFee();
+		}
+
+		if(chosenDate == null) { 		
+			for(int i = 0; i < tour.getAvailableDate().size(); i++) {
+				if (text.equals(df.format(tour.getAvailableDate().get(i)))) {
+					booking.setDate(tour.getAvailableDate().get(i));
+					TextMessage message = new TextMessage("How many adults?");
+					messages.add(message);
+					return messages;
+				}
+			}
+
+			TextMessage message = new TextMessage("Invalid date. Please choose an available date.");
+			messages.add(message);
+			return messages;
+		}
+		else if (adult == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity())) {
+			booking.setNoOfAdults(Integer.parseInt(text));
+			TextMessage message = new TextMessage("How many children (Age 4-11)?");
+			messages.add(message);
+			return messages;
+		}
+		else if (adult == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity())) {
+			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()) + " vacancy.");
+			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of adults. Otherwise, type 'no'.)");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+		else if (children == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult)) {
+			booking.setNoOfChildren(Integer.parseInt(text));
+			TextMessage message = new TextMessage("How many toddler (Age 0-3)?");
+			messages.add(message);
+			return messages;
+		}
+		else if (children == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult)) {
+			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()-adult) + " vacancy.");
+			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of children. Otherwise, type 'no'.)");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+		else if (toddler == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult + children)) {
+			booking.setNoOfToddler(Integer.parseInt(text));
+			TextMessage message = new TextMessage("Do you have any special request? (If yes, please enter your request. Otherwise, type 'NULL')");
+			messages.add(message);
+			return messages;
+		}
+		else if (toddler == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= tour.getCapacity() + adult + children)) {
+			TextMessage message1 = new TextMessage("Sorry! There is only " + String.valueOf(tour.getCapacity()-adult-children) + " vacancy.");
+			TextMessage message2 = new TextMessage("Do you want to continue this booking? (If yes, please re-enter the number of toddler. Otherwise, type 'no'.)");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+		else if (request == null && (text.length() > 0 && text.length() <= 50)) {
+			booking.setSpecialRequest(text);
+			int totalNoOfPeople = adult + children + toddler;
+			double serviceCharge = 60.0 * tour.getDays() * totalNoOfPeople;
+			double adultTotalFee = price * adult;
+			double childrenTotalFee = price * 0.8 * children;
+			booking.setTotalFee(adultTotalFee + childrenTotalFee + serviceCharge);
+			String line1 = tour.getTourID() + " " + tour.getName() + " " + df.format(chosenDate);
+			String line2 = "\nNo. of adults: " + String.valueOf(adult) + " * " + String.valueOf(price) + " = $" + String.valueOf(adultTotalFee);
+			String line3 = "\nNo. of children: " + String.valueOf(children) + " * " + String.valueOf(price*0.8) + " = $" + String.valueOf(childrenTotalFee);
+			String line4 = "\nNo. of toddler: " + String.valueOf(toddler) + " (free of charge)";
+			String line5 = "\nService Charge: $60 * " + String.valueOf(totalNoOfPeople) + " people * " + String.valueOf(tour.getDays()) + " days = $" + String.valueOf(serviceCharge);
+			String line6 = "\nTotal fee: " + String.valueOf(adultTotalFee + childrenTotalFee + serviceCharge);
+			String line7 = "\n\nSpecial request: " + booking.getSpecialRequest();
+			TextMessage message1 = new TextMessage(line1 + line2 + line3 + line4 + line5 + line6 + line7);
+			TextMessage message2 = new TextMessage("Do you wish to confirm this booking? (If yes, please enter 'confirmed'. Otherwise, enter 'no'.)");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+
+		TextMessage message = new TextMessage("Sorry I don't understand. Please re-enter.");
+		messages.add(message);
+		return messages;
+/*
+		if(success) {
+			status = -2;
+			booking.setTour(null);
+			TextMessage message = new TextMessage(CONFIRMED_BOOKING);
+			messages.add(message);
+			return messages;
+		}
+		else {
+			status = -2;
+			booking.setTour(null);
+			TextMessage message = new TextMessage("booking not successful"); 			/////////////////////////////////////////////not successful case
+			messages.add(message);
+			return messages;
+		}
+*/		//totalFee = price * noOfAdults + price * noOfChildren * 0.8 + (noOfAdults + noOfChildren + noOfToodler) * 60;
+
 	}
+
+	/*************************************************************************************************************************************************************/
+	/****************************************************************Create Customer******************************************************************************/
+	/*************************************************************************************************************************************************************/
+	private ArrayList<Message> createCustomer(String text) throws Exception {
+		ArrayList<Message> messages = new ArrayList<Message>();
+		boolean success = false;		
+
+		if (customer.getName() == null && (text.length() > 0 && text.length() <= 30)) {
+			customer.setName(text);
+			TextMessage message = new TextMessage("What is your phone number?");
+			messages.add(message);
+			return messages;
+		}
+		else if (customer.getName() == null && !(text.length() > 0 && text.length() <= 30)) {
+			TextMessage message = new TextMessage("Name is too long. Please re-enter.");
+			messages.add(message);
+			return messages;
+		}
+		else if(customer.getPhoneNo() == null && (text.length() > 0 && text.length() <= 8)) {
+			customer.setPhoneNo(text);
+			TextMessage message = new TextMessage("What is your age?");
+			messages.add(message);
+			return messages;
+		}
+		else if (customer.getPhoneNo() == null && !(text.length() > 0 && text.length() <= 8)) {
+			TextMessage message = new TextMessage("Invalid phone number. Please re-enter.");
+			messages.add(message);
+			return messages;
+		}
+		else if (customer.getAge() == -1 && (Integer.parseInt(text) > 0 && Integer.parseInt(text) <= 100)) {
+			customer.setAge(Integer.parseInt(text));
+			success = database.createCustomer(customer.getLineID(), customer.getName(), customer.getPhoneNo(), customer.getAge());
+			success = database.checkExistingCustomer(customer.getLineID(), customer);
+		}
+		else if (customer.getAge() == -1 && !(Integer.parseInt(text) > 0 && Integer.parseInt(text) <= 100)) {
+			TextMessage message = new TextMessage("Invalid age. Please re-enter.");
+			messages.add(message);
+			return messages;
+		}
+
+		if(success) {
+			status = 3;
+			TextMessage message1 = new TextMessage("You have successfully create your account.");
+			TextMessage message2 = new TextMessage("Which date you are going?");
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+		else {
+			status = -2;
+			booking.clearAllData();
+			TextMessage message1 = new TextMessage("You fail to create the account. Please contact our customer service for help.");
+			TextMessage message2 = new TextMessage("What other help do you need?");///////////////////////////////////////////////////////
+			messages.add(message1);
+			messages.add(message2);
+			return messages;
+		}
+>>>>>>> Stashed changes
+	}
+
+	private ArrayList<Message> searchPreviousRecord() throws Exception {
+		ArrayList<Message> messages = new ArrayList<Message>();
+
+
+
+
+
+	}
+
+
+
+
+
+
 
 	static String createUri(String path) {
 		return ServletUriComponentsBuilder.fromCurrentContextPath().path(path).build().toUriString();
@@ -461,10 +955,6 @@ public class KitchenSinkController {
 		return new DownloadedContent(tempFile, createUri("/downloaded/" + tempFile.getFileName()));
 	}
 
-
-	
-
-
 	public KitchenSinkController() {
 		database = new SQLDatabaseEngine();
 		itscLOGIN = System.getenv("ITSC_LOGIN");
@@ -472,7 +962,7 @@ public class KitchenSinkController {
 
 	private SQLDatabaseEngine database;
 	private String itscLOGIN;
-	
+
 
 	//The annontation @Value is from the package lombok.Value
 	//Basically what it does is to generate constructor and getter for the class below
@@ -488,27 +978,25 @@ public class KitchenSinkController {
 	class ProfileGetter implements BiConsumer<UserProfileResponse, Throwable> {
 		private KitchenSinkController ksc;
 		private String replyToken;
-		
+
 		public ProfileGetter(KitchenSinkController ksc, String replyToken) {
 			this.ksc = ksc;
 			this.replyToken = replyToken;
 		}
 		@Override
-    	public void accept(UserProfileResponse profile, Throwable throwable) {
-    		if (throwable != null) {
-            	ksc.replyText(replyToken, throwable.getMessage());
-            	return;
-        	}
-        	ksc.reply(
-                	replyToken,
-                	Arrays.asList(new TextMessage(
-                		"Display name: " + profile.getDisplayName()),
-                              	new TextMessage("Status message: "
-                            		  + profile.getStatusMessage()))
-        	);
-    	}
-    }
-	
-	
+		public void accept(UserProfileResponse profile, Throwable throwable) {
+			if (throwable != null) {
+				ksc.replyText(replyToken, throwable.getMessage());
+				return;
+			}
+			ksc.reply(
+				replyToken,
+				Arrays.asList(new TextMessage(
+					"Display name: " + profile.getDisplayName()),
+				new TextMessage("Status message: "
+					+ profile.getStatusMessage()))
+				);
+		}
+	}
 
 }
