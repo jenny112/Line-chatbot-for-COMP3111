@@ -94,6 +94,7 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.net.URL;
 
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSSample;
@@ -412,13 +413,11 @@ public class KitchenSinkController {
 		ArrayList<Message> messages = new ArrayList<Message>();
 		String[] faq9 = {"visa", "pass", "passport"};
 		// FAQ 9: VISA
-		for (int i = 0; i < tags.length; i++) {
-			for (String word: faq9) {
-				if (tags[i] == "NN" || tags[i] == "NNS") {
-					if (tokens[i].equals(word)) {
-						messages.add(new TextMessage(VISA));
-						return messages;
-					}
+		for (int i = 0; i < tokens.length; i++) {
+			for (String s: faq9) {
+				if (tokens[i].equals(s)) {
+					messages.add(new TextMessage(VISA));
+					return messages;
 				}
 			}
 		}
@@ -452,7 +451,8 @@ public class KitchenSinkController {
 				for (String s: faq2) {
 					if (tokens[i].equals(s)) {
 						messages.add(new TextMessage(GATHERING_POINT));
-						messages.add(new ImageMessage("/static/gather.jpg", "/static/gather.jpg"));
+						URL url = this.getClass().getResource("/static/gather.jpg");
+						messages.add(new ImageMessage(url.toString(), url.toString()));
 						return messages;
 					}
 				}
@@ -463,9 +463,10 @@ public class KitchenSinkController {
 		String faq3 = "cancel";
 		if (text.contains("tour")) {
 			if (containQW[0] || containQW[3]) {
-				if (text.contains(faq3))
+				if (text.contains(faq3)) {
 					messages.add(new TextMessage(CANCELLED_TOUR));
 					return messages;
+				}
 			}
 		}
 		
