@@ -130,6 +130,7 @@ public class KitchenSinkController {
 	private static final String CHILDREN_TOUR_FEE = "Age below 3 (including 3) is free. Age between 4 to 11 (including 4 and 11) has a discount of 20% off. Otherwise full fee applies. The same service charge is applied to all age customers.";
 	private static final String LATE = "You shall contact the tour guide if you know you will be late and see if the tour guide can wait a little bit longer. No refund or make up shall be made if a customer is late for the tour.";
 	
+	private static final String NOT_FOUND = "Sorry I don't understand what you are saying.";
 	
 	private Customer customer = new Customer();
 	private int status = -2;
@@ -317,13 +318,13 @@ public class KitchenSinkController {
 
 		switch (status) {
 			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); status = -2; break;	//Greeting
-			case 1: this.replyText(replyToken, searchForFAQ(text.toLowerCase(), tokens, tags)); break; //Search FAQ
+			case 1: this.reply(replyToken, searchForFAQ(text.toLowerCase(), tokens, tags)); break; //Search FAQ
 			case 2: this.reply(replyToken, searchTour(text, tokens, tags)); break; //Search tour
 			case 3: this.reply(replyToken, bookingProcess(text.toLowerCase())); break; //Book tour
 			case 4: break; //Search previous record
 			case 5: this.reply(replyToken, createCustomer(text)); break; //Create customer
 			case -1: this.replyText(replyToken, "Thank you for using our service. Bye!"); status = -2; break; //Exit
-			default: this.replyText(replyToken, "Sorry I don't understand what you are saying"); break; //Exit
+			default: this.replyText(replyToken, NOT_FOUND); break; //Exit
 		}
 	}
 	/*************************************************************************************************************************************************************/
@@ -407,14 +408,16 @@ public class KitchenSinkController {
 	/*************************************************************************************************************************************************************/
 	/*******************************************************************FAQ***************************************************************************************/
 	/*************************************************************************************************************************************************************/
-	private String searchForFAQ(String text, String[] tokens, String[] tags) throws Exception {
+	private ArrayList<Message> searchForFAQ(String text, String[] tokens, String[] tags) throws Exception {
+		ArrayList<Message> messages = new ArrayList<Message>();
 		String[] faq9 = {"visa", "pass", "passport"};
 		// FAQ 9: VISA
 		for (int i = 0; i < tags.length; i++) {
 			for (String word: faq9) {
 				if (tags[i] == "NN" || tags[i] == "NNS") {
 					if (tokens[i].equals(word)) {
-						return VISA;
+						messages.add(new TextMessage(VISA));
+						return messages;
 					}
 				}
 			}
@@ -429,7 +432,6 @@ public class KitchenSinkController {
 				if (!question)
 					question = true;
 				containQW[i] = true;
-				log.info("containQW: {} =>  {}", containQW[i], i);
 			}
 		}
 		
@@ -437,8 +439,10 @@ public class KitchenSinkController {
 		// FAQ 1: How to apply?
 		String faq1 = "apply";
 		if (containQW[0] || containQW[3]) {
-			if (text.contains(faq1))
-				return HOW_TO_APPLY;
+			if (text.contains(faq1)) {
+				messages.add(new TextMessage(HOW_TO_APPLY));
+				return messages;
+			}
 		}
 		
 		// FAQ 2: Gathering spot
@@ -446,8 +450,11 @@ public class KitchenSinkController {
 		if (containQW[1] || containQW[10] || containQW[11]) {
 			for (int i = 0; i < tokens.length; i++) {
 				for (String s: faq2) {
-					if (tokens[i].equals(s))
-						return GATHERING_POINT;
+					if (tokens[i].equals(s)) {
+						messages.add(new TextMessage(GATHERING_POINT));
+						messages.add(new ImageMessage("/static/gather.jpg", "/static/gather.jpg"));
+						return messages;
+					}
 				}
 			}
 		}
@@ -457,7 +464,8 @@ public class KitchenSinkController {
 		if (text.contains("tour")) {
 			if (containQW[0] || containQW[3]) {
 				if (text.contains(faq3))
-					return CANCELLED_TOUR;
+					messages.add(new TextMessage(CANCELLED_TOUR));
+					return messages;
 			}
 		}
 		
@@ -490,24 +498,26 @@ public class KitchenSinkController {
 				}
 			}
 			if (faq4First && faq4Second) {
-				return ADDITIONAL_CHARGE;
+				messages.add(new TextMessage(ADDITIONAL_CHARGE));
+				return messages;
 			} else {
-				if (text.contains(faq4))
-					return ADDITIONAL_CHARGE;
+				if (text.contains(faq4)) {
+					messages.add(new TextMessage(ADDITIONAL_CHARGE));
+					return messages;
+				}
 			}
 		}
 		
 		// FAQ 5: Transportation in Guangdong
 		String[] faq5 = {"transportation", "transport", "go", "goes"};
 		if (containQW[0] || containQW[3]) {
-			log.info("text: ", text);
 			if (text.contains("guangdong")) {
-				log.info("Entered in FAQ 5 loop");
 				for (int i = 0; i < tokens.length; i++) {
-					log.info("tokens[{}]: {}", i, tokens[i]);
 					for (String s: faq5) {
-						if (tokens[i].equals(faq5))
-							return TRANSPORTATION;
+						if (tokens[i].equals(s)) {
+							messages.add(new TextMessage(TRANSPORTATION));
+							return messages;
+						}
 					}
 				}
 			}
@@ -520,7 +530,8 @@ public class KitchenSinkController {
 				for (int i = 0; i < tokens.length; i++) {
 					for (String s: faq6) {
 						if (tokens[i].contains(s)) {
-							return TOUR_GUIDE_CONTACT;
+							messages.add(new TextMessage(TOUR_GUIDE_CONTACT));
+							return messages;
 						}
 					}
 				}
@@ -531,8 +542,10 @@ public class KitchenSinkController {
 		String faq7 = "insurance";
 		if (containQW[0] || containQW[3] || containQW[4] || containQW[5] || containQW[8] || containQW[9] || containQW[10] || containQW[11]) {
 			for (String s: tokens) {
-				if (s.equals(faq7))
-					return INSURANCE;
+				if (s.equals(faq7)) {
+					messages.add(new TextMessage(INSURANCE));
+					return messages;
+				}
 			}
 		}
 		
@@ -547,8 +560,10 @@ public class KitchenSinkController {
 		if (faq8First) {
 			for (int i = 0; i < tokens.length; i++) {
 				for (String s: faq82) {
-					if (tokens[i].equals(s))
-						return HOTEL_BED;
+					if (tokens[i].equals(s)) {
+						messages.add(new TextMessage(HOTEL_BED));
+						return messages;
+					}
 				}
 			}
 		}
@@ -557,16 +572,20 @@ public class KitchenSinkController {
 		String[] faq10 = {"swimming suit", "bathing suit", "beachwear", "bikini", "swimsuit", "swimwear"};
 		if (containQW[0] || containQW[3] || containQW[4]|| containQW[5] || containQW[6] || containQW[7] || containQW[8] || containQW[9]) {
 			for (String s: faq10) {
-				if (text.contains(s))
-					return SWIMMING_SUIT;
+				if (text.contains(s)) {
+					messages.add(new TextMessage(SWIMMING_SUIT));
+					return messages;
+				}
 			}
 		}
 		
 		// FAQ 11: Vegeterian
 		String faq11 = "vegetarian";
 		if (containQW[4] || containQW[5] || containQW[8] || containQW[9]) {
-			if (text.contains(faq11))
-				return VEGETARIAN;
+			if (text.contains(faq11)) {
+				messages.add(new TextMessage(VEGETARIAN));
+				return messages;
+			}
 		}
 		
 		// FAQ 12: Children fee
@@ -579,8 +598,10 @@ public class KitchenSinkController {
 			if (text.contains(faq12)) {
 				for (int i = 0; i < tokens.length; i++) {
 					for (String s: faq122) {
-						if (tokens[i].equals(s))
-							return CHILDREN_TOUR_FEE;
+						if (tokens[i].equals(s)) {
+							messages.add(new TextMessage(CHILDREN_TOUR_FEE));
+							return messages;
+						}
 					}
 				}
 			} else {
@@ -608,7 +629,8 @@ public class KitchenSinkController {
 				}
 			}
 			if (faq12First && faq12Second) {
-				return CHILDREN_TOUR_FEE;
+				messages.add(new TextMessage(CHILDREN_TOUR_FEE));
+				return messages;
 			}
 		}
 		
@@ -616,18 +638,19 @@ public class KitchenSinkController {
 		String[] faq13 = {"leave", "depart", "departure", "leaving"};
 		if (containQW[0] || containQW[4] || containQW[5] || containQW[6] || containQW[7] || containQW[8] || containQW[9]) {
 			if (text.contains("late")) {
-				log.info("Entered in FAQ 13 loop");
 				for (int i = 0; i < tokens.length; i++) {
-					log.info("tokens[{}]: {}", i, tokens[i]);
 					for (String s: faq13) {
-						if (tokens[i].equals(faq13))
-							return LATE;
+						if (tokens[i].equals(s)) {
+							messages.add(new TextMessage(LATE));
+							return messages;
+						}
 					}
 				}
 			}
 		}
 		status = -1;
-		return "Sorry I don't understand what you are saying.";
+		messages.add(new TextMessage(NOT_FOUND));
+		return messages;
 	}
 	
 	/*************************************************************************************************************************************************************/
