@@ -378,12 +378,19 @@ public class KitchenSinkController {
 		for(int i = 0; i < tags.length; i++) {
 			for(int j = 0; j < questionVerb.length; j++) {
 				if ((tags[i].equals("VB") || tags[i].equals("NN") || tags[i].equals("NNP")) && tokens[i].equals(questionVerb[j])) {
-					status = 1;
+					status = 2;
 					return;
 				}
 			}
-
-
+		}
+		
+		//check whether the user wants to search FAQ	
+		for(int i = 0; i < questionWord.length; i++) {
+			if (tokens[0].equals(questionWord[i])) {
+				status = 1;
+				customer.setStatus(status);
+				return;
+			}
 		}
 
 
