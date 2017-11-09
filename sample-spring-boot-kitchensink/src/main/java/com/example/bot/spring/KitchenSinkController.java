@@ -333,7 +333,8 @@ public class KitchenSinkController {
 
 		String[] greeting = {"hi", "hello", "hey", "yo", "is anyone there"};
 		String[] exit = {"bye", "byebye", "goodbye", "thanks", "see you",  "thank you"};
-		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "is", "are", "was", "were"};
+		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "would", "is", "are", "was", "were"};
+		String[] faqSpecialCase = {"visa", "pass", "passport"};
 		String[] questionVerb = {"ask", "know", "join", "book", "search"};
 
 		booking.clearAllData();
@@ -392,6 +393,13 @@ public class KitchenSinkController {
 				return;
 			}
 		}
+		for(int i = 0; i < faqSpecialCase.length; i++) {
+			if (tokens[0].equals(faqSpecialCase[i])) {
+				status = 1;
+				customer.setStatus(status);
+				return;
+			}
+		}
 
 
 	}
@@ -421,9 +429,10 @@ public class KitchenSinkController {
 				if (!question)
 					question = true;
 				containQW[i] = true;
+				log.info("containQW: {} =>  {}", containQW[i], i);
 			}
 		}
-		log.info("containQW: {} =>  {}", containQW.toString());
+		
 		
 		// FAQ 1: How to apply?
 		String faq1 = "apply";
@@ -491,7 +500,7 @@ public class KitchenSinkController {
 		// FAQ 5: Transportation in Guangdong
 		String[] faq5 = {"transportation", "transport", "go", "goes"};
 		if (containQW[0] || containQW[3]) {
-			if (text.contains("Guangdong")) {
+			if (text.contains("guangdong")) {
 				for (int i = 0; i < tokens.length; i++) {
 					for (String s: faq5) {
 						if (tokens[i].equals(faq5))
@@ -551,7 +560,7 @@ public class KitchenSinkController {
 		}
 		
 		// FAQ 11: Vegeterian
-		String faq11 = "vegeterian";
+		String faq11 = "vegetarian";
 		if (containQW[4] || containQW[5] || containQW[8] || containQW[9]) {
 			if (text.contains(faq11))
 				return VEGETERIAN;
@@ -577,7 +586,7 @@ public class KitchenSinkController {
 						for (String s: faq121) {
 							if (tokens[i].equals(s)) {
 								faq12First = true;
-								continue;
+								break;
 							}
 						}
 					}
@@ -585,7 +594,7 @@ public class KitchenSinkController {
 						for (String s: faq122) {
 							if (tokens[i].equals(s)) {
 								faq12Second = true;
-								continue;
+								break;
 							}
 						}
 					}
@@ -611,7 +620,7 @@ public class KitchenSinkController {
 			}
 		}
 		status = -1;
-		return "";
+		return "Sorry I don't understand what you are saying.";
 	}
 	
 	/*************************************************************************************************************************************************************/
