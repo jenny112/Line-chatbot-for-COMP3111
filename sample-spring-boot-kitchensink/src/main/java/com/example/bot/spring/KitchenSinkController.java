@@ -451,8 +451,9 @@ public class KitchenSinkController {
 				for (String s: faq2) {
 					if (tokens[i].equals(s)) {
 						messages.add(new TextMessage(GATHERING_POINT));
-						URL url = this.getClass().getResource("/static/gather.jpg");
-						messages.add(new ImageMessage(url.toString(), url.toString()));
+						//URL url = this.getClass().getResource("/static/gather.jpg");
+						String url = "https://raw.githubusercontent.com/khwang0/2017F-COMP3111/master/Project/topic%201/gather.jpg";
+						messages.add(new ImageMessage(url, url));
 						return messages;
 					}
 				}
