@@ -125,7 +125,7 @@ public class KitchenSinkController {
 	private static final String INSURANCE = "Insurance is covered. Each customers are protected by the Excellent Blue-Diamond Scheme by AAA insurance company.";
 	private static final String HOTEL_BED = "All rooms are twin beds. Every customer needs to share a room with another customer. If a customer prefer to own a room by himself/herself, additional charge of 30% will be applied.";
 	private static final String VISA = "Please refer the Visa issue to the immigration department of China. The tour are assembled and dismissed in mainland and no cross-border is needed. However, you will need a travelling document when you check in the hotel.";
-	private static final String SWIMMING_SUIT = "You will need a swimming suit in a water theme park or a hot spring resort. Otherwise you may not use the facility.";
+	private static final String SWIMMING_SUIT = "Yes you do need it. Otherwise you may not use the facility.";
 	private static final String VEGETERIAN = "Sorry, we don't serve vegeterian.";
 	private static final String CHILDREN_TOUR_FEE = "Age below 3 (including 3) is free. Age between 4 to 11 (including 4 and 11) has a discount of 20% off. Otherwise full fee applies. The same service charge is applied to all age customers.";
 	private static final String LATE = "You shall contact the tour guide if you know you will be late and see if the tour guide can wait a little bit longer. No refund or make up shall be made if a customer is late for the tour.";
@@ -317,16 +317,10 @@ public class KitchenSinkController {
 
 		switch (status) {
 			case 0: this.replyText(replyToken, "Welcome! How can I help you?"); status = -2; break;	//Greeting
-			case 1: 
-				String message = searchForFAQ(text.toLowerCase(), tokens, tags); //Search FAQ
-				if (message != "") {
-					message = "Sorry I don't understand what you are saying";
-				}
-				this.replyText(replyToken, message);
-				break;
+			case 1: break; //Search FAQ
 			case 2: this.reply(replyToken, searchTour(text, tokens, tags)); break; //Search tour
 			case 3: this.reply(replyToken, bookingProcess(text.toLowerCase())); break; //Book tour
-			case 4: this.reply(replyToken, searchPreviousRecord()); break; //Search previous record
+			case 4: break; //Search previous record
 			case 5: this.reply(replyToken, createCustomer(text)); break; //Create customer
 			case -1: this.replyText(replyToken, "Thank you for using our service. Bye!"); status = -2; break; //Exit
 			default: this.replyText(replyToken, "Sorry I don't understand what you are saying"); break; //Exit
@@ -339,7 +333,7 @@ public class KitchenSinkController {
 
 		String[] greeting = {"hi", "hello", "hey", "yo", "is anyone there"};
 		String[] exit = {"bye", "byebye", "goodbye", "thanks", "see you",  "thank you"};
-		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "would", "is", "are", "was", "were"};
+		String[] questionWord = {"what", "when", "where", "which", "how", "do", "does", "did", "can", "could", "will", "is", "are", "was", "were"};
 		String[] questionVerb = {"ask", "know", "join", "book", "search"};
 
 		booking.clearAllData();
@@ -394,223 +388,7 @@ public class KitchenSinkController {
 
 
 	}
-	/*************************************************************************************************************************************************************/
-	/*******************************************************************FAQ***************************************************************************************/
-	/*************************************************************************************************************************************************************/
-	private String searchForFAQ(String text, String[] tokens, String[] tags) throws Exception {
-		String[] faq9 = {"visa", "pass", "passport"};
-		// FAQ 9: VISA
-		for (int i = 0; i < tags.length; i++) {
-			for (String word: faq9) {
-				if (tags[i] == "NN" || tags[i] == "NNS") {
-					if (tokens[i].equals(word)) {
-						return VISA;
-					}
-				}
-			}
-		}
 
-		// Check for question words and store them
-		String[] questionWord = {"what", "where", "which", "how", "do", "does", "can", "could", "will", "would", "is", "are"};
-		boolean[] containQW = {false, false, false, false, false, false, false, false, false, false, false, false};
-		boolean question = false;
-		for (int i = 0; i < questionWord.length; i++) {
-			if (text.contains(questionWord[i])) {
-				if (!question)
-					question = true;
-				containQW[i] = true;
-			}
-		}
-		
-		// FAQ 1: How to apply?
-		String faq1 = "apply";
-		if (containQW[0] || containQW[3]) {
-			if (text.contains(faq1))
-				return HOW_TO_APPLY;
-		}
-		
-		// FAQ 2: Gathering spot
-		String[] faq2 = {"gather", "meet", "assemble", "dismiss", "gathering", "meeting", "dismissing"};
-		if (containQW[1] || containQW[10] || containQW[11]) {
-			for (int i = 0; i < tokens.length; i++) {
-				for (String s: faq2) {
-					if (tokens[i].equals(s))
-						return GATHERING_POINT;
-				}
-			}
-		}
-		
-		// FAQ 3: Cancelled
-		String faq3 = "cancel";
-		if (text.contains("tour")) {
-			if (containQW[0] || containQW[3]) {
-				if (text.contains(faq3))
-					return CANCELLED_TOUR;
-			}
-		}
-		
-		// FAQ 4: Additional charge
-		String[] faq41 = {"additional", "extra"};
-		boolean faq4First = false;
-		String[] faq42 = {"charge", "fee", "cost", "charges", "fees", "costs"};
-		boolean faq4Second = false;
-		String faq4 = "surcharge";
-		if (containQW[0] || containQW[3] || containQW[10] || containQW[11]) {
-			for (int i = 0; i < tokens.length; i++) {
-				if (!faq4First) {
-					for (String s1: faq41) {
-						if (tokens[i].equals(s1)) {
-							faq4First = true;
-							continue;
-						}
-					}
-				}
-				if (!faq4Second){
-					for (String s2: faq42) {
-						if (tokens[i].equals(s2)) {
-							faq4Second = true;
-							continue;
-						}
-					}
-				}
-				if (faq4First && faq4Second) {
-					break;
-				}
-			}
-			if (faq4First && faq4Second) {
-				return ADDITIONAL_CHARGE;
-			} else {
-				if (text.contains(faq4))
-					return ADDITIONAL_CHARGE;
-			}
-		}
-		
-		// FAQ 5: Transportation in Guangdong
-		String[] faq5 = {"transportation", "transport", "go", "goes"};
-		if (containQW[0] || containQW[3]) {
-			if (text.contains("Guangdong")) {
-				for (int i = 0; i < tokens.length; i++) {
-					for (String s: faq5) {
-						if (tokens[i].equals(faq5))
-							return TRANSPORTATION;
-					}
-				}
-			}
-		}
-		
-		// FAQ 6: Contact tour guide
-		String[] faq6 = {"contact", "find", "talk", "reach", "speak"};
-		if (text.contains("tour guide")) {
-			if (containQW[0] || containQW[3] || containQW[6] || containQW[7]) {
-				for (int i = 0; i < tokens.length; i++) {
-					for (String s: faq6) {
-						if (tokens[i].contains(s)) {
-							return TOUR_GUIDE_CONTACT;
-						}
-					}
-				}
-			}
-		}
-		
-		// FAQ 7: Insurance
-		String faq7 = "insurance";
-		if (containQW[0] || containQW[3] || containQW[4] || containQW[5] || containQW[8] || containQW[9] || containQW[10] || containQW[11]) {
-			for (String s: tokens) {
-				if (s.equals(faq7))
-					return INSURANCE;
-			}
-		}
-		
-		// FAQ 8: Bed arrangement in hotel
-		String[] faq81 = {"bed", "room"};
-		boolean faq8First = false;
-		String[] faq82 = {"arrangement", "arrange", "type", "single", "double", "twin", "number", "hotel"};
-		for (String s: faq81) {
-			if (text.contains(s)) 
-				faq8First = true;
-		}
-		if (faq8First) {
-			for (int i = 0; i < tokens.length; i++) {
-				for (String s: faq82) {
-					if (tokens[i].equals(s))
-						return HOTEL_BED;
-				}
-			}
-		}
-		
-		// FAQ 10: Swimming suit
-		String[] faq10 = {"swimming suit", "bathing suit", "beachwear", "bikini", "swimsuit", "swimwear"};
-		if (containQW[0] || containQW[3] || containQW[4]|| containQW[5] || containQW[6] || containQW[7] || containQW[8] || containQW[9]) {
-			for (String s: faq10) {
-				if (text.contains(s))
-					return SWIMMING_SUIT;
-			}
-		}
-		
-		// FAQ 11: Vegeterian
-		String faq11 = "vegeterian";
-		if (containQW[4] || containQW[5] || containQW[8] || containQW[9]) {
-			if (text.contains(faq11))
-				return VEGETERIAN;
-		}
-		
-		// FAQ 12: Children fee
-		String[] faq121 = {"fee, charge, price, cost"};
-		boolean faq12First = false;
-		String[] faq122 = {"kid", "child", "toodler", "kids", "toodlers", "children"};
-		boolean faq12Second = false;
-		String faq12 = "how much";
-		if (containQW[0] || containQW[3] || containQW[4] || containQW[5] || containQW[8] || containQW[9] || containQW[10] || containQW[11]) {
-			if (text.contains(faq12)) {
-				for (int i = 0; i < tokens.length; i++) {
-					for (String s: faq122) {
-						if (tokens[i].equals(s))
-							return CHILDREN_TOUR_FEE;
-					}
-				}
-			} else {
-				for (int i = 0; i < tokens.length; i++) {
-					if (!faq12First) {
-						for (String s: faq121) {
-							if (tokens[i].equals(s)) {
-								faq12First = true;
-								continue;
-							}
-						}
-					}
-					if (!faq12Second) {
-						for (String s: faq122) {
-							if (tokens[i].equals(s)) {
-								faq12Second = true;
-								continue;
-							}
-						}
-					}
-					if (faq12First && faq12Second)
-						break;
-				}
-			}
-			if (faq12First && faq12Second) {
-				return CHILDREN_TOUR_FEE;
-			}
-		}
-		
-		// FAQ 13: Late in departure date
-		String[] faq13 = {"leave", "depart", "departure", "leaving"};
-		if (containQW[0] || containQW[4] || containQW[5] || containQW[6] || containQW[7] || containQW[8] || containQW[9]) {
-			if (text.contains("late")) {
-				for (int i = 0; i < tokens.length; i++) {
-					for (String s: faq13) {
-						if (tokens[i].equals(faq13))
-							return LATE;
-					}
-				}
-			}
-		}
-		
-		return "";
-	}
-	
 	/*************************************************************************************************************************************************************/
 	/****************************************************************SearchTour***********************************************************************************/
 	/*************************************************************************************************************************************************************/
@@ -961,20 +739,6 @@ public class KitchenSinkController {
 			return messages;
 		}
 	}
-
-	private ArrayList<Message> searchPreviousRecord() throws Exception {
-		ArrayList<Message> messages = new ArrayList<Message>();
-		return null;
-
-
-
-
-	}
-
-
-
-
-
 
 
 	static String createUri(String path) {
