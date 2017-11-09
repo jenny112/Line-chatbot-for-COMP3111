@@ -16,18 +16,10 @@
 
 package com.example.bot.spring;
 
-<<<<<<< Updated upstream
-import java.util.ArrayList;
-import java.io.StringWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-=======
 
 import java.io.StringWriter;
 import java.io.IOException;
 import java.io.InputStream;
->>>>>>> Stashed changes
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -113,12 +105,6 @@ import opennlp.tools.tokenize.TokenizerModel;
 @Slf4j
 @LineMessageHandler
 public class KitchenSinkController {
-<<<<<<< Updated upstream
-	private static final int MAX_SEARCHED_TOURS = 10;
-	private static final int MAX_BOOKING_TOURS = 10;
-	private static final String NOT_FOUND = "Sorry, we don't have answer for this";
-	private boolean searchingTour = false;
-=======
 
 /*	private static final int MAX_SEARCHED_TOURS = 15;
 	private static final int MAX_BOOKING_TOURS = 15;
@@ -152,17 +138,12 @@ public class KitchenSinkController {
 	//arraylist of confirmed booking
 
 /*	private boolean searchingTour = false;
->>>>>>> Stashed changes
 	private Tour[] searchedTours = new Tour[MAX_SEARCHED_TOURS];
 	private int noOfSearchedTours = 0;
 	
 	private boolean bookingTour = false;
 	private Tour[] bookingTours = new Tour[MAX_BOOKING_TOURS];
 	private int noOfBookingTours = 0;
-<<<<<<< Updated upstream
-	
-	
-=======
 	
 	private boolean confirmingTour = false;
 	private InProgressBooking inProgressBooking = null;
@@ -177,7 +158,6 @@ public class KitchenSinkController {
 	
 	private boolean firstTimeEnterBookingTour = false;
 */	
->>>>>>> Stashed changes
 	@Autowired
 	private LineMessagingClient lineMessagingClient;
 
@@ -322,99 +302,6 @@ public class KitchenSinkController {
 		String[] tokens = tokenizer.tokenize(text);
 
         //Generate tags[]
-<<<<<<< Updated upstream
-        String tags[] = tagger.tag(tokens);
-        
-        log.info("Got text message from {}: {}", replyToken, text);
-        
-        //Reply
-		String reply = "";
-		try {
-			//reply = database.search(text);
-			
-			//Search keywords for greeting
-		    reply = searchForKeywords(tokens, tags);
-		    
-		    //When asking confirm from client to choose tour
-		    if (reply.equals("askingConfirmToChooseTour")) {
-		    	TextMessage message1 = new TextMessage(bookingTours[noOfBookingTours - 1].toString() + ". We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399");
-		    	//TextMessage message2 = new TextMessage("Do you want to book this one?");
-		    	ConfirmTemplate confirmTemplate = new ConfirmTemplate(
-		    			"Do you want to book this one?", 
-		    			new MessageAction("Yes", ":)"), 
-		    			new MessageAction("No", ":(")
-		    	);
-		    	TemplateMessage message2 = new TemplateMessage("Do you want to book this one?", confirmTemplate);
-		    	ArrayList<Message> messages = new ArrayList<Message>();
-		    	messages.add(message1);
-		    	messages.add(message2);
-		    	this.reply(replyToken, messages);
-		    }
-		    
-		    //If client is not greeting, reply don't have answer
-		    if (reply.equals(""))
-		    	reply = NOT_FOUND;
-		} catch (Exception e) {
-			//For debug use only
-			StringWriter sw = new StringWriter();
-			e.printStackTrace(new PrintWriter(sw));
-			this.replyText(replyToken, sw.toString());
-		} finally {
-			tokenis.close();
-			taggeris.close();
-		}
-		log.info("Returns echo message {}: {}", replyToken, reply);
-		this.replyText(replyToken, reply);
-	}
-	
-	private String searchForKeywords(String[] tokens, String[] tags) throws Exception {
-		//Check if tokens and tags are not null
-		if (tokens == null || tags == null) {
-			throw new Exception("Passing null arguments to searchForKeywords()");
-		}
-		//Define greeting words
-		String greetingString = "hi hello yo";
-		String questionVerbs = "ask know";
-		String questionWords = "what when how where";
-		
-		//Search for greeting words from client
-		boolean greeting = false;
-		boolean question = false;
-		boolean tour = false;
-		String adj = "";
-		
-		//If client is searching for tours
-		if (searchingTour) {
-			for (int i = 0; i < tags.length; i++) {
-				// Check which tour client wants to book
-				if (tags[i].equals("CD")) {
-					int tourIdInChatBot = Integer.parseInt(tokens[i]);
-					if (tourIdInChatBot > noOfSearchedTours) {
-						break;
-					}
-					Tour t = searchedTours[tourIdInChatBot - 1];
-					//Store the tour in bookingTours array
-					bookingTours[noOfBookingTours] = t;
-					noOfBookingTours++;
-					searchingTour = false;
-					bookingTour = true;
-					return "askingConfirmToChooseTour";
-					//return t.toString() + ". We have confirmed tour on 6/11, 15/11 We have tour on 13/11 still accept application. Fee: Weekday 299 / Weekend 399 Do you want to book this one?";
-				}
-			}
-		} // If client is booking tours
-		else if (bookingTour) {
-			bookingTour = false;
-			return "bookingTour";
-		}
-		
-		for (int i = 0; i < tags.length; i++) {
-			//for greeting
-			if (!greeting) {
-				if (tags[i].equals("PRP$") || tags[i].equals("UH")) {
-					if (greetingString.contains(tokens[i].toLowerCase())) {
-						greeting = true;
-=======
 		String tags[] = tagger.tag(tokens);
 
 		//convert the input message to lower case
@@ -471,7 +358,6 @@ public class KitchenSinkController {
 					if ((tokens[j]+" "+tokens[j+1]).contains(exit[i])) {
 						status = -1;
 						return;
->>>>>>> Stashed changes
 					}
 				}
 			}
@@ -695,53 +581,6 @@ public class KitchenSinkController {
 			booking.setLineID(customer.getLineID());			
 		}
 		
-<<<<<<< Updated upstream
-		//Return Greeting message if client greets first
-		if (greeting) {
-			return "Hi! How can I help you?";
-		} else if (tour) {
-			//Search for tour in db
-			//To be implemented...
-			searchingTour = true;
-			return searchForTours(adj);
-		}
-//		return "Searching for " + adj + "tours...";
-		String message = printStringArray(tags);
-		message += printStringArray(tokens);
-		return message;
-	}
-	
-	//Search and print tours
-	private String searchForTours(String tourName) {
-		//Remove previous search and booking record
-		searchedTours = new Tour[MAX_SEARCHED_TOURS];
-		noOfSearchedTours = 0;
-		bookingTours = new Tour[MAX_BOOKING_TOURS];
-		noOfBookingTours = 0;
-		
-		//To be implemented with database
-		//Hard-coded for now
-		Tour t = new Tour(1, "2D002", "Yangshan Hot Spring Tour", "* Unlimited use of hot spring * Famous Yangshan roaster cusine");
-		
-		// Save searchedTours in array for later use
-		searchedTours[noOfSearchedTours] = t;
-		noOfSearchedTours++;
-		
-		String text = "We have 1 tour.\n";
-		text = text + "  " + t.idInChatBot + ". " + t.getId() + " " + t.getName();
-		text += "\n Please indicate the corresponding tour number to book the tour.";
-		return text;
-	}
-	
-	//For debug use only
-	private String printStringArray(String[] stringArray) {
-		String message = "";
-		for (String s: stringArray) {
-			message = message + s + " ";
-		}
-		message += "\n";
-		return message;
-=======
 		if (price == -1 && chosenDate != null) {
 			booking.setTourFee();
 		}
@@ -899,12 +738,11 @@ public class KitchenSinkController {
 			messages.add(message2);
 			return messages;
 		}
->>>>>>> Stashed changes
 	}
 
 	private ArrayList<Message> searchPreviousRecord() throws Exception {
 		ArrayList<Message> messages = new ArrayList<Message>();
-
+		return null;
 
 
 

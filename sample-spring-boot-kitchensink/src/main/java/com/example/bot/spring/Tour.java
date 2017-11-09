@@ -1,34 +1,5 @@
 package com.example.bot.spring;
 
-<<<<<<< Updated upstream
-public class Tour {
-	int idInChatBot = -1; 		//Save tour's order of displaying for later use
-	private String id;
-	private String name;
-	private String description;
-	
-	public Tour(int idInChatBot, String id, String name, String description) {
-		this.idInChatBot = idInChatBot;
-		this.id = id;
-		this.name = name;
-		this.description = description;
-	}
-	
-	public String toString() {
-		return id + " " + name + " " + description;
-	}
-	
-	
-	public String getId() {
-		return id;
-	}
-	public String getName() {
-		return name;
-	}
-	public String getDescription() {
-		return description;
-	}
-=======
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -123,5 +94,4 @@ public class Tour {
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
->>>>>>> Stashed changes
 }
